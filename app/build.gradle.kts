@@ -76,6 +76,9 @@ dependencies {
     // Kotlin Serialization
     implementation(libs.kotlinx.serialization.json)
 
+    // Coil (Kotlin Image Loading Library)
+    implementation(libs.coil.compose)
+
     // Unit Testing
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
