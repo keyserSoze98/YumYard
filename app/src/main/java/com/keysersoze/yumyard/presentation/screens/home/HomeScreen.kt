@@ -30,10 +30,11 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.rememberAsyncImagePainter
 import com.keysersoze.yumyard.presentation.viewmodels.RecipeViewModel
 import androidx.compose.foundation.lazy.items
-
+import androidx.navigation.NavHostController
+import com.keysersoze.yumyard.presentation.navigation.Screen
 
 @Composable
-fun HomeScreen(viewModel: RecipeViewModel = viewModel()) {
+fun HomeScreen(viewModel: RecipeViewModel = viewModel(), navController: NavHostController) {
     val recipes by viewModel.recipes.collectAsState()
 
     Surface(
@@ -45,20 +46,27 @@ fun HomeScreen(viewModel: RecipeViewModel = viewModel()) {
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             items(recipes) { recipe ->
-                RecipeCard(recipe.title, recipe.description, recipe.imageUrl)
+                RecipeCard(
+                    title = recipe.title,
+                    description = recipe.description,
+                    imageUrl = recipe.imageUrl,
+                    onClick = {
+                        navController.navigate(Screen.RecipeDetail.route + "/${recipe.id}")
+                    }
+                )
             }
         }
     }
 }
 
 @Composable
-fun RecipeCard(title: String, description: String, imageUrl: String) {
+fun RecipeCard(title: String, description: String, imageUrl: String, onClick: () -> Unit) {
     Card(
         shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { /*Todo*/ }
+            .clickable { onClick() }
     ) {
         Column{
             Image(
