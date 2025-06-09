@@ -83,9 +83,13 @@ dependencies {
     // Data Store
     implementation(libs.androidx.datastore.preferences)
 
+    // Firebase BoM (Bill of Materials)
+    implementation(platform(libs.firebase.bom))
+
     // Firebase
     implementation(libs.firebase.auth.ktx)
     implementation(libs.play.services.auth)
+    implementation(libs.firebase.analytics)
 
     // Unit Testing
     testImplementation(libs.junit)
