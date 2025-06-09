@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.hilt)
     alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.google.services)
     kotlin("kapt")
 }
 
@@ -78,6 +79,13 @@ dependencies {
 
     // Coil (Kotlin Image Loading Library)
     implementation(libs.coil.compose)
+
+    // Data Store
+    implementation(libs.androidx.datastore.preferences)
+
+    // Firebase
+    implementation(libs.firebase.auth.ktx)
+    implementation(libs.play.services.auth)
 
     // Unit Testing
     testImplementation(libs.junit)
