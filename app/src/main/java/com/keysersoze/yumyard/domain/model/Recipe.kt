@@ -1,5 +1,8 @@
 package com.keysersoze.yumyard.domain.model
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class Recipe(
     val id: String,
     val title: String,

@@ -9,4 +9,10 @@ class RecipeRepository {
         val response = RecipeApiClient.api.searchRecipes(query)
         return response.meals?.map { it.toRecipe() } ?: emptyList()
     }
+
+    suspend fun getRandomRecipes(): List<Recipe> {
+        return List(5) {
+            RecipeApiClient.api.getRandomRecipe().meals?.firstOrNull()?.toRecipe()
+        }.filterNotNull()
+    }
 }

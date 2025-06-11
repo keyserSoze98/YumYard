@@ -27,9 +27,13 @@ fun NavGraph(navController: NavHostController) {
             HomeScreen(navController = navController)
         }
 
-        composable(route = Screen.RecipeDetail.route + "/{id}") { backStackEntry ->
+        /*composable(route = Screen.RecipeDetail.route + "/{id}") { backStackEntry ->
             val id = backStackEntry.arguments?.getString("id") ?: ""
             RecipeDetailScreen(recipeId = id)
+        }*/
+        composable("details/{recipeJson}") { backStackEntry ->
+            val recipeJson = backStackEntry.arguments?.getString("recipeJson") ?: ""
+            RecipeDetailScreen(recipeJson = recipeJson)
         }
     }
 }

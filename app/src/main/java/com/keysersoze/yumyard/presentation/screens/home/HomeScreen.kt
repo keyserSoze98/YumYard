@@ -30,30 +30,65 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.rememberAsyncImagePainter
 import com.keysersoze.yumyard.presentation.viewmodels.RecipeViewModel
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.runtime.key
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.text.input.ImeAction
 import androidx.navigation.NavHostController
 import com.keysersoze.yumyard.presentation.navigation.Screen
+import kotlinx.serialization.json.Json
+import java.net.URLEncoder
+import java.nio.charset.StandardCharsets
+import kotlinx.serialization.encodeToString
+
 
 @Composable
 fun HomeScreen(viewModel: RecipeViewModel = viewModel(), navController: NavHostController) {
     val recipes by viewModel.recipes.collectAsState()
+    val isLoading by viewModel.loading.collectAsState()
+    val query by viewModel.query.collectAsState()
 
     Surface(
         modifier = Modifier.fillMaxSize(),
         color = MaterialTheme.colorScheme.background
     ) {
-        LazyColumn(
-            contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp)
         ) {
-            items(recipes) { recipe ->
-                RecipeCard(
-                    title = recipe.title,
-                    description = recipe.description,
-                    imageUrl = recipe.imageUrl,
-                    onClick = {
-                        navController.navigate(Screen.RecipeDetail.route + "/${recipe.id}")
+            OutlinedTextField(
+                value = query,
+                onValueChange = { viewModel.onQueryChange(it) },
+                label = { Text("Search Recipes") },
+                singleLine = true,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 16.dp),
+                keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Search)
+            )
+
+            if (isLoading) {
+                CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
+            } else {
+                LazyColumn(
+                    contentPadding = PaddingValues(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    items(recipes) { recipe ->
+                        RecipeCard(
+                            title = recipe.title,
+                            description = recipe.description,
+                            imageUrl = recipe.imageUrl,
+                            onClick = {
+                                val encodedRecipe = URLEncoder.encode(Json.encodeToString(recipe), StandardCharsets.UTF_8.toString())
+                                navController.navigate("details/$encodedRecipe")
+                            }
+                        )
                     }
-                )
+                }
             }
         }
     }

@@ -12,78 +12,84 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.rememberAsyncImagePainter
-import com.keysersoze.yumyard.presentation.viewmodels.RecipeViewModel
+import com.keysersoze.yumyard.domain.model.Recipe
+import kotlinx.serialization.json.Json
+import java.net.URLDecoder
+import java.nio.charset.StandardCharsets
 
 @Composable
-fun RecipeDetailScreen(recipeId: String, viewModel: RecipeViewModel = viewModel()) {
-    val recipes by viewModel.recipes.collectAsState()
-    val recipe = recipes.find { it.id == recipeId }
-
-    recipe?.let {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp)
-                .verticalScroll(rememberScrollState())
-        ) {
-            Image(
-                painter = rememberAsyncImagePainter(recipe.imageUrl),
-                contentDescription = recipe.title,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(250.dp)
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Text(
-                text = recipe.title,
-                style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.Bold
-            )
-
-            Text(
-                text = recipe.description,
-                style = MaterialTheme.typography.bodyLarge,
-                modifier = Modifier.padding(vertical = 8.dp)
-            )
-
-            Text(
-                text = "🧂 Ingredients",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold
-            )
-
-            recipe.ingredients.forEach {
-                Text(text = "• $it", style = MaterialTheme.typography.bodyMedium)
-            }
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Text(
-                text = "👨‍🍳 Steps",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold,
-                modifier = Modifier.padding(top = 8.dp)
-            )
-
-            recipe.steps.forEachIndexed { i, step ->
-                Text(text = "${i + 1}. $step", style = MaterialTheme.typography.bodyMedium)
-            }
+fun RecipeDetailScreen(recipeJson: String) {
+    val decodedJson = URLDecoder.decode(recipeJson, StandardCharsets.UTF_8.toString())
+    val recipe = remember(decodedJson) {
+        try {
+            Json.decodeFromString<Recipe>(decodedJson)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
         }
-    } ?: run {
-        Text(
-            "Recipe not found!",
-            modifier = Modifier.padding(16.dp)
+    }
+
+    if (recipe == null) {
+        Text("Oops! Recipe couldn't be loaded.", modifier = Modifier.padding(16.dp))
+        return
+    }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)
+            .verticalScroll(rememberScrollState())
+    ) {
+        Image(
+            painter = rememberAsyncImagePainter(recipe.imageUrl),
+            contentDescription = recipe.title,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(250.dp)
         )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Text(
+            text = recipe.title,
+            style = MaterialTheme.typography.headlineMedium,
+            fontWeight = FontWeight.Bold
+        )
+
+        Text(
+            text = recipe.description,
+            style = MaterialTheme.typography.bodyLarge,
+            modifier = Modifier.padding(vertical = 8.dp)
+        )
+
+        Text(
+            text = "🧂 Ingredients",
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.SemiBold
+        )
+
+        recipe.ingredients.forEach {
+            Text(text = "• $it", style = MaterialTheme.typography.bodyMedium)
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Text(
+            text = "👨‍🍳 Steps",
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.SemiBold,
+            modifier = Modifier.padding(top = 8.dp)
+        )
+
+        recipe.steps.forEachIndexed { i, step ->
+            Text(text = "${i + 1}. $step", style = MaterialTheme.typography.bodyMedium)
+        }
     }
 }
