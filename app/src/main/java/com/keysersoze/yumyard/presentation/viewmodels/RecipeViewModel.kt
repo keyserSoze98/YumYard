@@ -1,17 +1,27 @@
 package com.keysersoze.yumyard.presentation.viewmodels
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.keysersoze.yumyard.data.repository.RecipeRepository
 import com.keysersoze.yumyard.domain.model.Recipe
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 
 class RecipeViewModel: ViewModel() {
+
+    private val repository = RecipeRepository()
 
     private val _recipes = MutableStateFlow<List<Recipe>>(emptyList())
     val recipes: StateFlow<List<Recipe>> = _recipes
 
+    private val _loading = MutableStateFlow(false)
+    val loading: StateFlow<Boolean> = _loading
+
     init {
-        loadDummyRecipes()
+        //loadDummyRecipes()
+        loadRecipes()
     }
 
     private fun loadDummyRecipes() {
@@ -41,5 +51,16 @@ class RecipeViewModel: ViewModel() {
                 steps = listOf("Peel mango", "Blend all ingredients", "Serve chilled")
             )
         )
+    }
+
+    fun loadRecipes(query: String = "chicken") {
+        viewModelScope.launch {
+            _loading.value = true
+            try {
+                _recipes.value = repository.search(query)
+            } catch (e: Exception) {
+                Log.e("@@@RecipeVM", "API Failed", e)
+            }
+        }
     }
 }
