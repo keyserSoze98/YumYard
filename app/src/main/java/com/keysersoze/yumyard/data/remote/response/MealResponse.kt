@@ -9,6 +9,7 @@ data class MealResponse(
 data class MealDto(
     val idMeal: String,
     val strMeal: String,
+    val strArea: String,
     val strInstructions: String,
     val strMealThumb: String,
     val strIngredient1: String?,
@@ -75,6 +76,7 @@ fun MealDto.toRecipe(): Recipe {
         id = idMeal,
         title = strMeal,
         description = strInstructions.take(200) + "...",
+        cuisine = strArea,
         imageUrl = strMealThumb,
         ingredients = ingredients,
         steps = strInstructions.split("\r\n").filter { it.isNotBlank() }

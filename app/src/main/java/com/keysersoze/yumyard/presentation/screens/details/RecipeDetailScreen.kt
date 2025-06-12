@@ -64,6 +64,12 @@ fun RecipeDetailScreen(recipeJson: String) {
         )
 
         Text(
+            text = "Cuisine: ${recipe.cuisine}",
+            style = MaterialTheme.typography.headlineSmall,
+            fontWeight = FontWeight.SemiBold
+        )
+
+        Text(
             text = recipe.description,
             style = MaterialTheme.typography.bodyLarge,
             modifier = Modifier.padding(vertical = 8.dp)
