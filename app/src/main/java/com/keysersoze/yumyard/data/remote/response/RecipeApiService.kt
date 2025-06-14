@@ -1,8 +1,6 @@
 package com.keysersoze.yumyard.data.remote.response
 
-import com.keysersoze.yumyard.domain.model.Recipe
 import retrofit2.http.GET
-import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface RecipeApiService {

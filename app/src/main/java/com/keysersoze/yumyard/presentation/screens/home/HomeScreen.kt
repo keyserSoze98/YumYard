@@ -69,7 +69,7 @@ import java.nio.charset.StandardCharsets
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen(viewModel: RecipeViewModel = viewModel(), navController: NavHostController) {
+fun HomeScreen(viewModel: RecipeViewModel = hiltViewModel(), navController: NavHostController) {
     val recipes by viewModel.recipes.collectAsState()
     val isLoading by viewModel.loading.collectAsState()
     val query by viewModel.query.collectAsState()
