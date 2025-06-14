@@ -5,5 +5,5 @@ sealed class Screen(val route: String) {
     object RecipeDetail : Screen("recipe_detail")
     object Splash : Screen("splash")
     object Login : Screen("login")
-
+    object Favorites: Screen("favorites")
 }

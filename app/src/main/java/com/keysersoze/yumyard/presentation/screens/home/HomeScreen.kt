@@ -15,16 +15,36 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DrawerValue
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalDrawerSheet
+import androidx.compose.material3.ModalNavigationDrawer
+import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Surface
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -33,135 +53,205 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
+import com.keysersoze.yumyard.domain.model.Recipe
+import com.keysersoze.yumyard.domain.model.toFavoriteEntity
+import com.keysersoze.yumyard.presentation.viewmodels.FavoriteViewModel
 import com.keysersoze.yumyard.presentation.viewmodels.RecipeViewModel
+import kotlinx.coroutines.launch
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(viewModel: RecipeViewModel = viewModel(), navController: NavHostController) {
     val recipes by viewModel.recipes.collectAsState()
     val isLoading by viewModel.loading.collectAsState()
     val query by viewModel.query.collectAsState()
 
-    Surface(
-        modifier = Modifier.fillMaxSize(),
-        color = MaterialTheme.colorScheme.background
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp)
-        ) {
-            OutlinedTextField(
-                value = query,
-                onValueChange = { viewModel.onQueryChange(it) },
-                label = { Text("Search Recipes") },
-                singleLine = true,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 16.dp),
-                keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Search)
-            )
+    val drawerState = rememberDrawerState(DrawerValue.Closed)
+    val scope = rememberCoroutineScope()
 
-            when {
-                isLoading -> {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        CircularProgressIndicator()
+    ModalNavigationDrawer(
+        drawerState = drawerState,
+        drawerContent = {
+            ModalDrawerSheet {
+                Text(
+                    "YumYard",
+                    modifier = Modifier.padding(16.dp),
+                    style = MaterialTheme.typography.headlineSmall
+                )
+                HorizontalDivider(
+                    modifier = Modifier.padding(8.dp),
+                    thickness = 4.dp,
+                    color = Color.Red
+                )
+
+                NavigationDrawerItem(
+                    label = { Text("My Account") },
+                    selected = false,
+                    onClick = {
+                        navController.navigate("account")
+                        scope.launch { drawerState.close() }
+                    },
+                    icon = {
+                        Icon(Icons.Default.Person, contentDescription = "My Account")
                     }
-                }
+                )
 
-                recipes.isNotEmpty() -> {
-                    LazyColumn(
-                        contentPadding = PaddingValues(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(16.dp)
-                    ) {
-                        items(recipes) { recipe ->
-                            RecipeCard(
-                                title = recipe.title,
-                                cuisine = recipe.cuisine,
-                                description = recipe.description,
-                                imageUrl = recipe.imageUrl,
-                                onClick = {
-                                    val encodedRecipe = URLEncoder.encode(
-                                        Json.encodeToString(recipe),
-                                        StandardCharsets.UTF_8.toString()
-                                    )
-                                    navController.navigate("details/$encodedRecipe")
-                                }
-                            )
+                NavigationDrawerItem(
+                    label = { Text("Favorites") },
+                    selected = false,
+                    onClick = {
+                        navController.navigate("favorites")
+                        scope.launch { drawerState.close() }
+                    },
+                    icon = {
+                        Icon(Icons.Default.Favorite, contentDescription = "Favorites")
+                    }
+                )
+            }
+        }
+    ) {
+        Scaffold(
+            topBar = {
+                TopAppBar(
+                    title = { Text("YumYard") },
+                    navigationIcon = {
+                        IconButton(onClick = {
+                            scope.launch { drawerState.open() }
+                        }) {
+                            Icon(Icons.Default.Menu, contentDescription = "Menu")
+                        }
+                    }
+                )
+            }
+        ) { innerPadding ->
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding)
+                    .padding(horizontal = 16.dp)
+            ) {
+                OutlinedTextField(
+                    value = query,
+                    onValueChange = { viewModel.onQueryChange(it) },
+                    label = { Text("Search Recipes") },
+                    singleLine = true,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp),
+                    keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Search)
+                )
+
+                when {
+                    isLoading -> {
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CircularProgressIndicator()
+                        }
+                    }
+
+                    recipes.isNotEmpty() -> {
+                        LazyColumn(
+                            contentPadding = PaddingValues(16.dp),
+                            verticalArrangement = Arrangement.spacedBy(16.dp)
+                        ) {
+                            items(recipes) { recipe ->
+                                RecipeCard(
+                                    recipe = recipe,
+                                    onClick = {
+                                        val encodedRecipe = URLEncoder.encode(
+                                            Json.encodeToString(recipe),
+                                            StandardCharsets.UTF_8.toString()
+                                        )
+                                        navController.navigate("details/$encodedRecipe")
+                                    }
+                                )
+                            }
+                        }
+                    }
+
+                    else -> {
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text("No recipes found 😞")
                         }
                     }
                 }
-
-                else -> {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text("No recipes found 😞")
-                    }
-                }
             }
-
         }
     }
 }
 
+
 @Composable
-fun RecipeCard(title: String, cuisine: String, description: String, imageUrl: String, onClick: () -> Unit) {
+fun RecipeCard(
+    recipe: Recipe,
+    onClick: () -> Unit,
+    viewModel: FavoriteViewModel = hiltViewModel()
+) {
+    val coroutineScope = rememberCoroutineScope()
+    var isFav by remember { mutableStateOf(false) }
+
+    LaunchedEffect(recipe.id) {
+        isFav = viewModel.isFavorite(recipe.id)
+    }
+
     Card(
-        shape = RoundedCornerShape(16.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { onClick() }
+            .clickable { onClick() },
+        shape = RoundedCornerShape(16.dp),
+        elevation = CardDefaults.cardElevation(8.dp)
     ) {
-        Column{
-            Image(
-                painter = rememberAsyncImagePainter(model = imageUrl),
-                contentDescription = title,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(200.dp)
-                    .clip(RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp))
-            )
-
-            Column(
-                modifier = Modifier
-                    .padding(16.dp)
-            ) {
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold
-                )
-
-                Text(
-                    text = "Cuisine: $cuisine",
-                    style = MaterialTheme.typography.bodySmall,
-                    fontWeight = FontWeight.SemiBold
-                )
-
-                Spacer(
+        Column {
+            Box {
+                Image(
+                    painter = rememberAsyncImagePainter(model = recipe.imageUrl),
+                    contentDescription = recipe.title,
+                    contentScale = ContentScale.Crop,
                     modifier = Modifier
-                        .height(4.dp)
+                        .fillMaxWidth()
+                        .height(200.dp)
+                        .clip(RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp))
                 )
 
-                Text(
-                    text = description,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = Color.Gray
-                )
+                IconButton(
+                    onClick = {
+                        coroutineScope.launch {
+                            if (isFav) {
+                                viewModel.removeFromFavorites(recipe.toFavoriteEntity())
+                            } else {
+                                viewModel.addToFavorites(recipe.toFavoriteEntity())
+                            }
+                            isFav = !isFav
+                        }
+                    },
+                    modifier = Modifier.align(Alignment.TopEnd)
+                ) {
+                    Icon(
+                        imageVector = if (isFav) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                        contentDescription = "Favorite",
+                        tint = if (isFav) Color.Red else Color.Gray
+                    )
+                }
+            }
+
+            Column(modifier = Modifier.padding(16.dp)) {
+                Text(recipe.title, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                Text("Cuisine: ${recipe.cuisine}", style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.SemiBold)
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(recipe.description, style = MaterialTheme.typography.bodyMedium, color = Color.Gray)
             }
         }
     }

@@ -5,6 +5,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.keysersoze.yumyard.presentation.screens.details.RecipeDetailScreen
+import com.keysersoze.yumyard.presentation.screens.favorite.FavoriteScreen
 import com.keysersoze.yumyard.presentation.screens.home.HomeScreen
 import com.keysersoze.yumyard.presentation.screens.login.LoginScreen
 import com.keysersoze.yumyard.presentation.screens.splash.SplashScreen
@@ -27,13 +28,13 @@ fun NavGraph(navController: NavHostController) {
             HomeScreen(navController = navController)
         }
 
-        /*composable(route = Screen.RecipeDetail.route + "/{id}") { backStackEntry ->
-            val id = backStackEntry.arguments?.getString("id") ?: ""
-            RecipeDetailScreen(recipeId = id)
-        }*/
         composable("details/{recipeJson}") { backStackEntry ->
             val recipeJson = backStackEntry.arguments?.getString("recipeJson") ?: ""
             RecipeDetailScreen(recipeJson = recipeJson)
+        }
+
+        composable(route = Screen.Favorites.route) {
+            FavoriteScreen(navController)
         }
     }
 }

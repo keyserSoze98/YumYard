@@ -1,5 +1,6 @@
 package com.keysersoze.yumyard.domain.model
 
+import com.keysersoze.yumyard.data.local.entities.FavoriteEntity
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -12,3 +13,13 @@ data class Recipe(
     val ingredients: List<String>,
     val steps: List<String>
 )
+
+fun Recipe.toFavoriteEntity(): FavoriteEntity {
+    return FavoriteEntity(
+        id = this.id,
+        title = this.title,
+        imageUrl = this.imageUrl,
+        description = this.description,
+        cuisine = this.cuisine
+    )
+}

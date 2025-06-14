@@ -1,3 +1,6 @@
+import org.gradle.kotlin.dsl.implementation
+import org.gradle.kotlin.dsl.testImplementation
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -20,6 +23,16 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        javaCompileOptions {
+            annotationProcessorOptions {
+                arguments += mapOf(
+                    "room.schemaLocation" to "$projectDir/schemas".toString(),
+                    "room.incremental" to "true",
+                    "room.expandProjection" to "true"
+                )
+            }
+        }
     }
 
     buildTypes {
@@ -45,6 +58,17 @@ android {
     }
     buildFeatures {
         compose = true
+    }
+    kapt {
+        correctErrorTypes = true
+        arguments {
+            arg("room.schemaLocation", "$projectDir/schemas")
+            arg("room.incremental", "true")
+        }
+        javacOptions {
+            option("-Adagger.fastInit=ENABLED")
+            option("-Adagger.hilt.android.internal.disableAndroidSuperclassValidation=true")
+        }
     }
 }
 
@@ -91,6 +115,11 @@ dependencies {
     implementation(libs.play.services.auth)
     implementation(libs.firebase.analytics)
 
+    // Room components
+    implementation(libs.androidx.room.runtime)
+    kapt(libs.androidx.room.compiler)
+    implementation(libs.androidx.room.ktx)
+
     // Unit Testing
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
@@ -104,4 +133,5 @@ dependencies {
     androidTestImplementation(libs.mockk.android)
     androidTestImplementation(libs.hilt.android.testing)
     kaptAndroidTest(libs.hilt.compiler)
+    testImplementation(libs.androidx.room.testing)
 }

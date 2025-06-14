@@ -2,6 +2,7 @@ package com.keysersoze.yumyard.data.repository
 
 import com.keysersoze.yumyard.data.remote.response.toRecipe
 import com.keysersoze.yumyard.di.RecipeApiClient
+import com.keysersoze.yumyard.di.RecipeApiClient.api
 import com.keysersoze.yumyard.domain.model.Recipe
 
 class RecipeRepository {
