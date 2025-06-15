@@ -54,11 +54,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
 import com.keysersoze.yumyard.domain.model.Recipe
-import com.keysersoze.yumyard.domain.model.toFavoriteEntity
+import com.keysersoze.yumyard.domain.model.toFavorite
 import com.keysersoze.yumyard.presentation.viewmodels.FavoriteViewModel
 import com.keysersoze.yumyard.presentation.viewmodels.RecipeViewModel
 import kotlinx.coroutines.launch
@@ -230,9 +229,9 @@ fun RecipeCard(
                     onClick = {
                         coroutineScope.launch {
                             if (isFav) {
-                                viewModel.removeFromFavorites(recipe.toFavoriteEntity())
+                                viewModel.removeFromFavorites(recipe.toFavorite())
                             } else {
-                                viewModel.addToFavorites(recipe.toFavoriteEntity())
+                                viewModel.addToFavorites(recipe.toFavorite())
                             }
                             isFav = !isFav
                         }

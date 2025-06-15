@@ -1,4 +1,4 @@
-package com.keysersoze.yumyard.data.repository
+package com.keysersoze.yumyard.data.repository.recipe
 
 import com.keysersoze.yumyard.data.remote.response.RecipeApiService
 import com.keysersoze.yumyard.data.remote.response.toRecipe

@@ -2,9 +2,9 @@ package com.keysersoze.yumyard.presentation.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.keysersoze.yumyard.data.local.entities.FavoriteEntity
-import com.keysersoze.yumyard.data.repository.FavoriteRepository
+import com.keysersoze.yumyard.domain.model.Favorite
 import com.keysersoze.yumyard.domain.model.Recipe
+import com.keysersoze.yumyard.domain.usecase.favorite.FavoriteUseCases
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -14,30 +14,33 @@ import javax.inject.Inject
 
 @HiltViewModel
 class FavoriteViewModel @Inject constructor(
-    private val repository: FavoriteRepository
+    private val favoriteUseCases: FavoriteUseCases
 ) : ViewModel() {
 
-    val favorites: StateFlow<List<FavoriteEntity>> =
-        repository.getAllFavorites()
-            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+    val favorites: StateFlow<List<Favorite>> = favoriteUseCases.getAllFavoritesUseCase()
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList()
+        )
 
-    fun addToFavorites(recipe: FavoriteEntity) {
+    fun addToFavorites(favorite: Favorite) {
         viewModelScope.launch {
-            repository.addToFavorites(recipe)
+            favoriteUseCases.addToFavoritesUseCase(favorite)
         }
     }
 
-    fun removeFromFavorites(recipe: FavoriteEntity) {
+    fun removeFromFavorites(favorite: Favorite) {
         viewModelScope.launch {
-            repository.deleteFromFavorites(recipe)
+            favoriteUseCases.deleteFromFavoritesUseCase(favorite)
         }
     }
 
     suspend fun isFavorite(id: String): Boolean {
-        return repository.isFavorite(id)
+        return favoriteUseCases.isFavoriteUseCase(id)
     }
 
     suspend fun fetchFullRecipeById(id: String): Recipe {
-        return repository.fetchFullRecipeById(id)
+        return favoriteUseCases.fetchFullRecipeByIdUseCase(id)
     }
 }

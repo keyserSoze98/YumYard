@@ -1,8 +1,8 @@
 package com.keysersoze.yumyard.di
 
 import com.keysersoze.yumyard.data.remote.response.RecipeApiService
-import com.keysersoze.yumyard.data.repository.RecipeRepository
-import com.keysersoze.yumyard.data.repository.RecipeRepositoryImpl
+import com.keysersoze.yumyard.data.repository.recipe.RecipeRepository
+import com.keysersoze.yumyard.data.repository.recipe.RecipeRepositoryImpl
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

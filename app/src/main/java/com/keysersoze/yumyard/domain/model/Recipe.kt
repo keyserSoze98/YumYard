@@ -14,8 +14,8 @@ data class Recipe(
     val steps: List<String>
 )
 
-fun Recipe.toFavoriteEntity(): FavoriteEntity {
-    return FavoriteEntity(
+fun Recipe.toFavorite(): Favorite {
+    return Favorite(
         id = this.id,
         title = this.title,
         imageUrl = this.imageUrl,

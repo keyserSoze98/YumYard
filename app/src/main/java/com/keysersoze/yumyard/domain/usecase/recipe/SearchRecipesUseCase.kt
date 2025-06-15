@@ -1,6 +1,6 @@
-package com.keysersoze.yumyard.domain.usecase
+package com.keysersoze.yumyard.domain.usecase.recipe
 
-import com.keysersoze.yumyard.data.repository.RecipeRepository
+import com.keysersoze.yumyard.data.repository.recipe.RecipeRepository
 import com.keysersoze.yumyard.domain.model.Recipe
 import javax.inject.Inject
 

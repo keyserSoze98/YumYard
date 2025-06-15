@@ -2,10 +2,9 @@ package com.keysersoze.yumyard.presentation.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.keysersoze.yumyard.data.repository.RecipeRepository
 import com.keysersoze.yumyard.domain.model.Recipe
-import com.keysersoze.yumyard.domain.usecase.GetRandomRecipesUseCase
-import com.keysersoze.yumyard.domain.usecase.SearchRecipesUseCase
+import com.keysersoze.yumyard.domain.usecase.recipe.GetRandomRecipesUseCase
+import com.keysersoze.yumyard.domain.usecase.recipe.SearchRecipesUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow

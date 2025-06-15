@@ -32,7 +32,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.rememberAsyncImagePainter
 import com.keysersoze.yumyard.domain.model.Recipe
-import com.keysersoze.yumyard.domain.model.toFavoriteEntity
+import com.keysersoze.yumyard.domain.model.toFavorite
 import com.keysersoze.yumyard.presentation.viewmodels.FavoriteViewModel
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
@@ -72,9 +72,9 @@ fun RecipeDetailScreen(recipeJson: String, viewModel: FavoriteViewModel = hiltVi
             onClick = {
                 coroutineScope.launch {
                     if (isFav) {
-                        viewModel.removeFromFavorites(recipe.toFavoriteEntity())
+                        viewModel.removeFromFavorites(recipe.toFavorite())
                     } else {
-                        viewModel.addToFavorites(recipe.toFavoriteEntity())
+                        viewModel.addToFavorites(recipe.toFavorite())
                     }
                     isFav = !isFav
                 }

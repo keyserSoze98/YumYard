@@ -12,9 +12,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
-import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavController
-import com.keysersoze.yumyard.presentation.viewmodels.FavoriteViewModel
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -24,8 +21,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.keysersoze.yumyard.data.local.entities.toRecipe
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
+import com.keysersoze.yumyard.domain.model.toRecipe
 import com.keysersoze.yumyard.presentation.screens.home.RecipeCard
+import com.keysersoze.yumyard.presentation.viewmodels.FavoriteViewModel
 import kotlinx.coroutines.launch
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
