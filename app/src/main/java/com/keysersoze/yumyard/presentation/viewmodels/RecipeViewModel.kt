@@ -4,6 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.keysersoze.yumyard.data.repository.RecipeRepository
 import com.keysersoze.yumyard.domain.model.Recipe
+import com.keysersoze.yumyard.domain.usecase.GetRandomRecipesUseCase
+import com.keysersoze.yumyard.domain.usecase.SearchRecipesUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -17,7 +19,8 @@ import javax.inject.Inject
 @OptIn(FlowPreview::class)
 @HiltViewModel
 class RecipeViewModel @Inject constructor(
-    private val repository: RecipeRepository
+    private val searchRecipesUseCase: SearchRecipesUseCase,
+    private val getRandomRecipesUseCase: GetRandomRecipesUseCase
 ): ViewModel() {
 
     private val _query = MutableStateFlow("")
@@ -57,7 +60,7 @@ class RecipeViewModel @Inject constructor(
     suspend fun loadRecipes(query: String) {
         _loading.value = true
         try {
-            _recipes.value = repository.search(query)
+            _recipes.value = searchRecipesUseCase(query)
         } catch (e: Exception) {
             e.printStackTrace()
         } finally {
@@ -69,7 +72,7 @@ class RecipeViewModel @Inject constructor(
         viewModelScope.launch {
             _loading.value = true
             try {
-                _recipes.value = repository.getRandomRecipes()
+                _recipes.value = getRandomRecipesUseCase()
             } catch (e: Exception) {
                 e.printStackTrace()
             } finally {

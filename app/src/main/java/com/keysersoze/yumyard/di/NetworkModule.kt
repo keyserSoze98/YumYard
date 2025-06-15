@@ -1,6 +1,8 @@
 package com.keysersoze.yumyard.di
 
 import com.keysersoze.yumyard.data.remote.response.RecipeApiService
+import com.keysersoze.yumyard.data.repository.RecipeRepository
+import com.keysersoze.yumyard.data.repository.RecipeRepositoryImpl
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -28,5 +30,11 @@ object NetworkModule {
     @Singleton
     fun provideRecipeApiService(retrofit: Retrofit): RecipeApiService {
         return retrofit.create(RecipeApiService::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideRecipeRepository(api: RecipeApiService): RecipeRepository {
+        return RecipeRepositoryImpl(api)
     }
 }
