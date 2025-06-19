@@ -34,4 +34,6 @@ class FavoriteRepositoryImpl @Inject constructor(
         return response.meals?.firstOrNull()?.toRecipe()
             ?: throw Exception("Recipe not found")
     }
+
+    override suspend fun clearAllFavorites() = dao.clearAllFavorites()
 }

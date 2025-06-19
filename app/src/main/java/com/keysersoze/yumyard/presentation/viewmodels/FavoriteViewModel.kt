@@ -43,4 +43,10 @@ class FavoriteViewModel @Inject constructor(
     suspend fun fetchFullRecipeById(id: String): Recipe {
         return favoriteUseCases.fetchFullRecipeByIdUseCase(id)
     }
+
+    fun clearAllFavorites() {
+        viewModelScope.launch {
+            favoriteUseCases.clearAllFavoritesUseCase()
+        }
+    }
 }

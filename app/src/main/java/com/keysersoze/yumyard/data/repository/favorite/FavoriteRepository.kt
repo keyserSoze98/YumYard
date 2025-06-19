@@ -10,4 +10,5 @@ interface FavoriteRepository {
     suspend fun deleteFromFavorites(recipe: Favorite)
     suspend fun isFavorite(id: String): Boolean
     suspend fun fetchFullRecipeById(id: String): Recipe
+    suspend fun clearAllFavorites()
 }

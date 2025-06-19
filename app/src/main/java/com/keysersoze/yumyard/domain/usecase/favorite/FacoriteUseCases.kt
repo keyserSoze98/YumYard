@@ -7,5 +7,6 @@ data class FavoriteUseCases @Inject constructor(
     val addToFavoritesUseCase: AddToFavoritesUseCase,
     val deleteFromFavoritesUseCase: DeleteFromFavoritesUseCase,
     val isFavoriteUseCase: IsFavoriteUseCase,
-    val fetchFullRecipeByIdUseCase: FetchFullRecipeByIdUseCase
+    val fetchFullRecipeByIdUseCase: FetchFullRecipeByIdUseCase,
+    val clearAllFavoritesUseCase: ClearAllFavoritesUseCase
 )

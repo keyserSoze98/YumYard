@@ -22,4 +22,7 @@ interface FavoriteDao {
 
     @Query("SELECT EXISTS(SELECT 1 FROM favorites WHERE id = :id)")
     suspend fun isFavorite(id: String): Boolean
+
+    @Query("DELETE FROM favorites")
+    suspend fun clearAllFavorites()
 }

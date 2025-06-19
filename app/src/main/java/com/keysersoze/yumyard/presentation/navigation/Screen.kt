@@ -1,9 +1,10 @@
 package com.keysersoze.yumyard.presentation.navigation
 
 sealed class Screen(val route: String) {
-    object Home : Screen("home")
-    object RecipeDetail : Screen("recipe_detail")
-    object Splash : Screen("splash")
-    object Login : Screen("login")
-    object Favorites: Screen("favorites")
+    data object Home : Screen("home")
+    data object RecipeDetail : Screen("recipe_detail")
+    data object Splash : Screen("splash")
+    data object Login : Screen("login")
+    data object Favorites: Screen("favorites")
+    data object Account: Screen("account")
 }
