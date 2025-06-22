@@ -1,8 +1,13 @@
 package com.keysersoze.yumyard.presentation.screens.account
 
+import android.net.Uri
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -52,6 +57,24 @@ fun AccountScreen(navController: NavController, viewModel: AccountViewModel = hi
     var isEditing by remember { mutableStateOf(false) }
     var showDeleteDialog by remember { mutableStateOf(false) }
 
+    var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
+
+    val imageLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) {
+        uri ->
+        uri?.let {
+            selectedImageUri = it
+            viewModel.updatePhotoUrl(it) { success ->
+                Toast.makeText(
+                    context,
+                    if (success) "Profile picture updated!" else "Failed to updated picture!",
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+        }
+    }
+
     Surface(
         modifier = Modifier
             .fillMaxSize()
@@ -65,13 +88,32 @@ fun AccountScreen(navController: NavController, viewModel: AccountViewModel = hi
         ) {
             Spacer(modifier = Modifier.height(32.dp))
 
-            Image(
-                painter = rememberAsyncImagePainter(user?.photoUrl ?: "https://i.pravatar.cc/150?img=3"),
-                contentDescription = "Profile Image",
+            Box(
                 modifier = Modifier
                     .size(100.dp)
                     .clip(CircleShape)
-            )
+                    .clickable { imageLauncher.launch("image/*") },
+                contentAlignment = Alignment.BottomEnd
+            ) {
+                Image(
+                    painter = rememberAsyncImagePainter(
+                        selectedImageUri ?: user?.photoUrl ?: "https://i.pravatar.cc/150?img=3"
+                    ),
+                    contentDescription = "Profile Image",
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .clip(CircleShape)
+                )
+                Icon(
+                    imageVector = Icons.Default.Edit,
+                    contentDescription = "Edit Photo",
+                    tint = Color.White,
+                    modifier = Modifier
+                        .size(24.dp)
+                        .padding(4.dp)
+                        .align(Alignment.BottomEnd)
+                )
+            }
 
             Spacer(modifier = Modifier.height(16.dp))
 
