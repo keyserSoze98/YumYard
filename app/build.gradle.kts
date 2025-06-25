@@ -121,7 +121,6 @@ dependencies {
     // Refresh Page
     implementation(libs.google.accompanist.swiperefresh)
 
-
     // Unit Testing
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

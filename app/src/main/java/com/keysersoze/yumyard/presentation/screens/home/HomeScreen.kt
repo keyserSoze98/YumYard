@@ -16,6 +16,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
@@ -117,6 +118,18 @@ fun HomeScreen(viewModel: RecipeViewModel = hiltViewModel(), navController: NavH
                     },
                     icon = {
                         Icon(Icons.Default.Favorite, contentDescription = "Favorites")
+                    }
+                )
+
+                NavigationDrawerItem(
+                    label = { Text("Your Recipes") },
+                    selected = false,
+                    onClick = {
+                        navController.navigate("draft_recipes")
+                        scope.launch { drawerState.close() }
+                    },
+                    icon = {
+                        Icon(Icons.Default.Add, contentDescription = "Your Recipes")
                     }
                 )
 

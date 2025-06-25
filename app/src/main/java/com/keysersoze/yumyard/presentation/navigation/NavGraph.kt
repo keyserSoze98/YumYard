@@ -6,6 +6,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.keysersoze.yumyard.presentation.screens.account.AccountScreen
 import com.keysersoze.yumyard.presentation.screens.details.RecipeDetailScreen
+import com.keysersoze.yumyard.presentation.screens.drafts.DraftRecipesScreen
 import com.keysersoze.yumyard.presentation.screens.favorite.FavoriteScreen
 import com.keysersoze.yumyard.presentation.screens.home.HomeScreen
 import com.keysersoze.yumyard.presentation.screens.login.LoginScreen
@@ -40,6 +41,10 @@ fun NavGraph(navController: NavHostController) {
 
         composable(route = Screen.Account.route) {
             AccountScreen(navController)
+        }
+
+        composable(route = Screen.DraftRecipes.route) {
+            DraftRecipesScreen(navController)
         }
     }
 }

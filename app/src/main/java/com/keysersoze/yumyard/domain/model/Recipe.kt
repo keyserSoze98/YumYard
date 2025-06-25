@@ -1,6 +1,5 @@
 package com.keysersoze.yumyard.domain.model
 
-import com.keysersoze.yumyard.data.local.entities.FavoriteEntity
 import kotlinx.serialization.Serializable
 
 @Serializable
