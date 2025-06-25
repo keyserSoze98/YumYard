@@ -1,6 +1,5 @@
 package com.keysersoze.yumyard.presentation.screens.splash
 
-import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -27,8 +26,11 @@ fun SplashScreen(navController: NavHostController) {
     val auth = FirebaseAuth.getInstance()
 
     LaunchedEffect(Unit) {
-        delay(2000)
-        if (auth.currentUser != null) {
+        delay(1000)
+        navController.navigate(Screen.Home.route) {
+            popUpTo(Screen.Splash.route) { inclusive = true }
+        }
+        /*if (auth.currentUser != null) {
             Log.d("@@@SplashScreen", "User logged in: ${auth.currentUser?.email}")
             navController.navigate(Screen.Home.route) {
                 popUpTo(Screen.Splash.route) { inclusive = true }
@@ -38,7 +40,7 @@ fun SplashScreen(navController: NavHostController) {
             navController.navigate(Screen.Login.route) {
                 popUpTo(Screen.Splash.route) { inclusive = true }
             }
-        }
+        }*/
     }
 
     Box(
@@ -47,7 +49,7 @@ fun SplashScreen(navController: NavHostController) {
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Image(
-                painter = painterResource(id = R.drawable.ic_launcher_foreground),
+                painter = painterResource(id = R.mipmap.ic_launcher_foreground),
                 contentDescription = "YumYard Logo",
                 modifier = Modifier.size(120.dp)
             )

@@ -1,6 +1,3 @@
-import org.gradle.kotlin.dsl.implementation
-import org.gradle.kotlin.dsl.testImplementation
-
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -117,8 +114,13 @@ dependencies {
 
     // Room components
     implementation(libs.androidx.room.runtime)
+    //noinspection KaptUsageInsteadOfKsp
     kapt(libs.androidx.room.compiler)
     implementation(libs.androidx.room.ktx)
+
+    // Refresh Page
+    implementation(libs.google.accompanist.swiperefresh)
+
 
     // Unit Testing
     testImplementation(libs.junit)

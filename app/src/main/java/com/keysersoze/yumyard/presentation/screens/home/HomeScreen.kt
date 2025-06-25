@@ -16,10 +16,10 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -56,6 +56,8 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
+import com.google.accompanist.swiperefresh.SwipeRefresh
+import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.keysersoze.yumyard.domain.model.Recipe
 import com.keysersoze.yumyard.domain.model.toFavorite
 import com.keysersoze.yumyard.presentation.viewmodels.FavoriteViewModel
@@ -65,6 +67,7 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
+import kotlin.system.exitProcess
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -75,6 +78,7 @@ fun HomeScreen(viewModel: RecipeViewModel = hiltViewModel(), navController: NavH
 
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
+    val swipeRefreshState = rememberSwipeRefreshState(isRefreshing = isLoading)
 
     ModalNavigationDrawer(
         drawerState = drawerState,
@@ -91,7 +95,7 @@ fun HomeScreen(viewModel: RecipeViewModel = hiltViewModel(), navController: NavH
                     color = Color.Red
                 )
 
-                NavigationDrawerItem(
+                /*NavigationDrawerItem(
                     label = { Text("My Account") },
                     selected = false,
                     onClick = {
@@ -101,7 +105,7 @@ fun HomeScreen(viewModel: RecipeViewModel = hiltViewModel(), navController: NavH
                     icon = {
                         Icon(Icons.Default.Person, contentDescription = "My Account")
                     }
-                )
+                )*/
 
                 NavigationDrawerItem(
                     label = { Text("Favorites") },
@@ -112,6 +116,17 @@ fun HomeScreen(viewModel: RecipeViewModel = hiltViewModel(), navController: NavH
                     },
                     icon = {
                         Icon(Icons.Default.Favorite, contentDescription = "Favorites")
+                    }
+                )
+
+                NavigationDrawerItem(
+                    label = { Text("Exit App") },
+                    selected = false,
+                    onClick = {
+                        exitProcess(0)
+                    },
+                    icon = {
+                        Icon(Icons.Default.Close, contentDescription = "Favorites")
                     }
                 )
             }
@@ -131,59 +146,66 @@ fun HomeScreen(viewModel: RecipeViewModel = hiltViewModel(), navController: NavH
                 )
             }
         ) { innerPadding ->
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding)
-                    .padding(horizontal = 16.dp)
+            SwipeRefresh(
+                state = swipeRefreshState,
+                onRefresh = {
+                    viewModel.onQueryChange("")
+                }
             ) {
-                OutlinedTextField(
-                    value = query,
-                    onValueChange = { viewModel.onQueryChange(it) },
-                    label = { Text("Search Recipes") },
-                    singleLine = true,
+                Column(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 8.dp),
-                    keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Search)
-                )
+                        .fillMaxSize()
+                        .padding(innerPadding)
+                        .padding(horizontal = 16.dp)
+                ) {
+                    OutlinedTextField(
+                        value = query,
+                        onValueChange = { viewModel.onQueryChange(it) },
+                        label = { Text("Search Recipes") },
+                        singleLine = true,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 8.dp),
+                        keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Search)
+                    )
 
-                when {
-                    isLoading -> {
-                        Box(
-                            modifier = Modifier.fillMaxSize(),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            CircularProgressIndicator()
-                        }
-                    }
-
-                    recipes.isNotEmpty() -> {
-                        LazyColumn(
-                            contentPadding = PaddingValues(16.dp),
-                            verticalArrangement = Arrangement.spacedBy(16.dp)
-                        ) {
-                            items(recipes) { recipe ->
-                                RecipeCard(
-                                    recipe = recipe,
-                                    onClick = {
-                                        val encodedRecipe = URLEncoder.encode(
-                                            Json.encodeToString(recipe),
-                                            StandardCharsets.UTF_8.toString()
-                                        )
-                                        navController.navigate("details/$encodedRecipe")
-                                    }
-                                )
+                    when {
+                        isLoading -> {
+                            Box(
+                                modifier = Modifier.fillMaxSize(),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                CircularProgressIndicator()
                             }
                         }
-                    }
 
-                    else -> {
-                        Box(
-                            modifier = Modifier.fillMaxSize(),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text("No recipes found 😞")
+                        recipes.isNotEmpty() -> {
+                            LazyColumn(
+                                contentPadding = PaddingValues(16.dp),
+                                verticalArrangement = Arrangement.spacedBy(16.dp)
+                            ) {
+                                items(recipes) { recipe ->
+                                    RecipeCard(
+                                        recipe = recipe,
+                                        onClick = {
+                                            val encodedRecipe = URLEncoder.encode(
+                                                Json.encodeToString(recipe),
+                                                StandardCharsets.UTF_8.toString()
+                                            )
+                                            navController.navigate("details/$encodedRecipe")
+                                        }
+                                    )
+                                }
+                            }
+                        }
+
+                        else -> {
+                            Box(
+                                modifier = Modifier.fillMaxSize(),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text("No recipes found 😞")
+                            }
                         }
                     }
                 }
