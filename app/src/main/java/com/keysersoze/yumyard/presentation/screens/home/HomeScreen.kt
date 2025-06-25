@@ -20,6 +20,7 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -95,7 +96,7 @@ fun HomeScreen(viewModel: RecipeViewModel = hiltViewModel(), navController: NavH
                     color = Color.Red
                 )
 
-                /*NavigationDrawerItem(
+                NavigationDrawerItem(
                     label = { Text("My Account") },
                     selected = false,
                     onClick = {
@@ -105,7 +106,7 @@ fun HomeScreen(viewModel: RecipeViewModel = hiltViewModel(), navController: NavH
                     icon = {
                         Icon(Icons.Default.Person, contentDescription = "My Account")
                     }
-                )*/
+                )
 
                 NavigationDrawerItem(
                     label = { Text("Favorites") },

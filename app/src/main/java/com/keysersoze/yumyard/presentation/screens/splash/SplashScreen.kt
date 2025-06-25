@@ -1,5 +1,6 @@
 package com.keysersoze.yumyard.presentation.screens.splash
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -27,10 +28,7 @@ fun SplashScreen(navController: NavHostController) {
 
     LaunchedEffect(Unit) {
         delay(1000)
-        navController.navigate(Screen.Home.route) {
-            popUpTo(Screen.Splash.route) { inclusive = true }
-        }
-        /*if (auth.currentUser != null) {
+        if (auth.currentUser != null) {
             Log.d("@@@SplashScreen", "User logged in: ${auth.currentUser?.email}")
             navController.navigate(Screen.Home.route) {
                 popUpTo(Screen.Splash.route) { inclusive = true }
@@ -40,7 +38,7 @@ fun SplashScreen(navController: NavHostController) {
             navController.navigate(Screen.Login.route) {
                 popUpTo(Screen.Splash.route) { inclusive = true }
             }
-        }*/
+        }
     }
 
     Box(
