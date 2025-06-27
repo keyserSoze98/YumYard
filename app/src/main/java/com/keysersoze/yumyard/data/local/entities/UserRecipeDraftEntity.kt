@@ -9,8 +9,8 @@ data class UserRecipeDraftEntity(
     val title: String = "",
     val cuisine: String = "",
     val imageUrl: String = "",
-    val instructions: String = "",
-    val ingredients: List<String> = emptyList(),
-    val measures: List<String> = emptyList(),
+    val description: String = "",
+    val steps: String = "",
+    val ingredients: List<Pair<String, String>> = listOf(Pair("", "")),
     val lastUpdated: Long = System.currentTimeMillis()
 )

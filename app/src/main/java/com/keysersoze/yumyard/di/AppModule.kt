@@ -10,10 +10,13 @@ import com.keysersoze.yumyard.data.repository.draft.DraftRecipeRepository
 import com.keysersoze.yumyard.data.repository.draft.DraftRecipeRepositoryImpl
 import com.keysersoze.yumyard.data.repository.favorite.FavoriteRepository
 import com.keysersoze.yumyard.data.repository.favorite.FavoriteRepositoryImpl
+import com.keysersoze.yumyard.domain.usecase.draft.DeleteDraftByIdUseCase
 import com.keysersoze.yumyard.domain.usecase.draft.DeleteDraftUseCase
 import com.keysersoze.yumyard.domain.usecase.draft.DraftUseCases
 import com.keysersoze.yumyard.domain.usecase.draft.GetAllDraftsUseCase
+import com.keysersoze.yumyard.domain.usecase.draft.GetDraftByIdUseCase
 import com.keysersoze.yumyard.domain.usecase.draft.SaveDraftUseCase
+import com.keysersoze.yumyard.domain.usecase.draft.UpsertDraftUseCase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -32,7 +35,9 @@ object AppModule {
             context,
             YumYardDatabase::class.java,
             "yumyard_db"
-        ).build()
+        )
+        .fallbackToDestructiveMigration()
+        .build()
     }
 
     @Provides
@@ -65,7 +70,10 @@ object AppModule {
         return DraftUseCases(
             getAllDraftsUseCase = GetAllDraftsUseCase(repository),
             saveDraftUseCase = SaveDraftUseCase(repository),
-            deleteDraftUseCase = DeleteDraftUseCase(repository)
+            deleteDraftUseCase = DeleteDraftUseCase(repository),
+            getDraftByIdUseCase = GetDraftByIdUseCase(repository),
+            deleteDraftByIdUseCase = DeleteDraftByIdUseCase(repository),
+            upsertDraftUseCase = UpsertDraftUseCase(repository)
         )
     }
 }

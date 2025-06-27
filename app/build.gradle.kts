@@ -80,6 +80,7 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+    implementation(libs.androidx.material.icons.extended)
 
     // Lifecycle + ViewModel
     implementation(libs.androidx.lifecycle.runtime.ktx)
@@ -111,6 +112,8 @@ dependencies {
     implementation(libs.firebase.auth.ktx)
     implementation(libs.play.services.auth)
     implementation(libs.firebase.analytics)
+    implementation(libs.firebase.firestore.ktx)
+    implementation(libs.firebase.storage.ktx)
 
     // Room components
     implementation(libs.androidx.room.runtime)

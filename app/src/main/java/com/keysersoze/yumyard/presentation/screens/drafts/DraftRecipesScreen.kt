@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
@@ -33,7 +34,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -53,59 +53,80 @@ fun DraftRecipesScreen(
 ) {
     val drafts by viewModel.drafts.collectAsState()
     val user = FirebaseAuth.getInstance().currentUser
-    val context = LocalContext.current
 
-    Surface(
-        modifier = Modifier.fillMaxSize()
-    ) {
-        if (drafts.isEmpty()) {
-            Column(
+    Surface(modifier = Modifier.fillMaxSize()) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp)
+        ) {
+            // 💬 Greeting + Add Button (Always visible)
+            Row(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .padding(24.dp),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Image(
-                    painter = rememberAsyncImagePainter(user?.photoUrl),
-                    contentDescription = "User Photo",
-                    modifier = Modifier
-                        .size(100.dp)
-                        .clip(CircleShape)
-                )
-
-                Spacer(modifier = Modifier.height(12.dp))
-
-                Text("Hello ${user?.displayName ?: "Chef"} 👨‍🍳")
-
-                Spacer(modifier = Modifier.height(4.dp))
-
-                Text("Let's add your recipe!", fontWeight = FontWeight.SemiBold)
-
-                Spacer(modifier = Modifier.height(24.dp))
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Image(
+                        painter = rememberAsyncImagePainter(user?.photoUrl),
+                        contentDescription = "User Photo",
+                        modifier = Modifier
+                            .size(50.dp)
+                            .clip(CircleShape)
+                    )
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Text(
+                        text = "Hey ${user?.displayName ?: "Chef"} 👨‍🍳",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
 
                 Button(
                     onClick = {
                         val newId = UUID.randomUUID().toString()
                         navController.navigate("add_edit_recipe/$newId")
-                    }
+                    },
+                    shape = RoundedCornerShape(8.dp),
+                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
                 ) {
-                    Text("Add Recipe")
+                    Text(text = "+ Add Recipe")
                 }
             }
-        } else {
-            LazyColumn(
-                contentPadding = PaddingValues(16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ){
-                items(drafts) { draft ->
-                    DraftRecipeCard(
-                        draft = draft,
-                        onDelete = { viewModel.deleteDraft(draft) },
-                        onClick = {
-                            navController.navigate("add_edit_recipe/${draft.id}")
-                        }
-                    )
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            if (drafts.isEmpty()) {
+                // 🍳 No drafts? Encourage creation
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(top = 48.dp),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text("No drafts yet!", style = MaterialTheme.typography.bodyMedium)
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text("Tap + Add Recipe to get started 🚀")
+                }
+            } else {
+                // 📋 Draft list
+                LazyColumn(
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    items(drafts) { draft ->
+                        DraftRecipeCard(
+                            draft = draft,
+                            onDelete = { viewModel.deleteDraft(draft) },
+                            onClick = {
+                                navController.navigate("add_edit_recipe/${draft.id}")
+                            }
+                        )
+                    }
                 }
             }
         }

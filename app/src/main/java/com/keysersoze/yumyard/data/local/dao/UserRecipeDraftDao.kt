@@ -18,4 +18,10 @@ interface UserRecipeDraftDao {
 
     @Delete
     suspend fun deleteDraft(draft: UserRecipeDraftEntity)
+
+    @Query("SELECT * FROM user_recipe_drafts WHERE id = :id LIMIT 1")
+    suspend fun getDraftById(id: String): UserRecipeDraftEntity?
+
+    @Query("DELETE FROM user_recipe_drafts WHERE id = :id")
+    suspend fun deleteDraftById(id: String)
 }

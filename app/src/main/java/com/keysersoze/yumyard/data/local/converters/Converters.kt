@@ -14,4 +14,15 @@ class Converters {
         val listType = object : TypeToken<List<String>>() {}.type
         return Gson().fromJson(value, listType)
     }
+
+    @TypeConverter
+    fun fromPairList(value: List<Pair<String, String>>): String {
+        return Gson().toJson(value)
+    }
+
+    @TypeConverter
+    fun toPairList(value: String): List<Pair<String, String>> {
+        val listType = object : TypeToken<List<Pair<String, String>>>() {}.type
+        return Gson().fromJson(value, listType)
+    }
 }
