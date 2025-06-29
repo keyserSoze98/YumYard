@@ -4,7 +4,9 @@ import android.net.Uri
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -59,6 +61,7 @@ fun AddEditRecipeScreen(
     val context = LocalContext.current
     val user = FirebaseAuth.getInstance().currentUser
     val draftState by viewModel.draft.collectAsState()
+    val isUploading by viewModel.isUploading.collectAsState()
 
     val imagePickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
@@ -70,196 +73,227 @@ fun AddEditRecipeScreen(
         viewModel.loadDraft(draftId)
     }
 
-    if (draftState == null) {
-        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            CircularProgressIndicator()
-        }
-    } else {
-        val draft = draftState!!
-        val scrollState = rememberScrollState()
-
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(scrollState)
-                .padding(16.dp),
-            verticalArrangement = Arrangement.Top
-        ) {
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // 🧑‍🍳 Profile
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Image(
-                    painter = rememberAsyncImagePainter(user?.photoUrl),
-                    contentDescription = "Profile Pic",
-                    modifier = Modifier
-                        .size(60.dp)
-                        .clip(CircleShape)
-                )
-                Spacer(modifier = Modifier.width(12.dp))
-                Text(
-                    text = "Hello ${user?.displayName ?: "Chef"}, let's cook something up!",
-                    fontWeight = FontWeight.Bold
-                )
+    Box(modifier = Modifier.fillMaxSize()) {
+        when {
+            draftState == null -> {
+                CircularProgressIndicator(Modifier.align(Alignment.Center))
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
+            else -> {
+                val draft = draftState!!
+                val scrollState = rememberScrollState()
 
-            // 🖋 Title
-            OutlinedTextField(
-                value = draft.title,
-                onValueChange = { viewModel.updateTitle(it) },
-                label = { Text("Recipe Title") },
-                modifier = Modifier.fillMaxWidth()
-            )
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .verticalScroll(scrollState)
+                        .padding(16.dp),
+                    verticalArrangement = Arrangement.Top
+                ) {
+                    Spacer(modifier = Modifier.height(16.dp))
 
-            Spacer(modifier = Modifier.height(12.dp))
+                    // 🧑‍🍳 Profile
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Image(
+                            painter = rememberAsyncImagePainter(user?.photoUrl),
+                            contentDescription = "Profile Pic",
+                            modifier = Modifier
+                                .size(60.dp)
+                                .clip(CircleShape)
+                        )
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Text(
+                            text = "Hello ${user?.displayName ?: "Chef"}, let's cook something up!",
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
 
-            // 🌍 Cuisine
-            OutlinedTextField(
-                value = draft.cuisine,
-                onValueChange = { viewModel.updateCuisine(it) },
-                label = { Text("Cuisine") },
-                modifier = Modifier.fillMaxWidth()
-            )
+                    Spacer(modifier = Modifier.height(24.dp))
 
-            Spacer(modifier = Modifier.height(20.dp))
+                    // 🖋 Title
+                    OutlinedTextField(
+                        value = draft.title,
+                        onValueChange = { viewModel.updateTitle(it) },
+                        label = { Text("Recipe Title") },
+                        modifier = Modifier.fillMaxWidth()
+                    )
 
-            // 📸 Image Upload Section
-            Text(
-                "Recipe Image",
-                fontWeight = FontWeight.SemiBold,
-                style = MaterialTheme.typography.titleSmall
-            )
-            Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(12.dp))
 
+                    // 🌍 Cuisine
+                    OutlinedTextField(
+                        value = draft.cuisine,
+                        onValueChange = { viewModel.updateCuisine(it) },
+                        label = { Text("Cuisine") },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+
+                    Spacer(modifier = Modifier.height(20.dp))
+
+                    // 📸 Image Upload Section
+                    Text(
+                        "Recipe Image",
+                        fontWeight = FontWeight.SemiBold,
+                        style = MaterialTheme.typography.titleSmall
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(200.dp)
+                            .clip(RoundedCornerShape(16.dp))
+                            .border(2.dp, Color.LightGray, RoundedCornerShape(16.dp))
+                            .clickable(enabled = !isUploading) {
+                                imagePickerLauncher.launch("image/*")
+                            },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        if (draft.imageUrl.isNotBlank()) {
+                            Image(
+                                painter = rememberAsyncImagePainter(draft.imageUrl),
+                                contentDescription = "Recipe Image",
+                                modifier = Modifier.fillMaxSize()
+                            )
+                        } else {
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                Icon(
+                                    imageVector = Icons.Default.AddPhotoAlternate,
+                                    contentDescription = "Upload Icon",
+                                    modifier = Modifier.size(48.dp),
+                                    tint = Color.Gray
+                                )
+                                Text("Tap to upload image", color = Color.Gray)
+                            }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(24.dp))
+
+                    // 📜 Instructions
+                    OutlinedTextField(
+                        value = draft.steps,
+                        onValueChange = { viewModel.updateSteps(it) },
+                        label = { Text("Instructions") },
+                        modifier = Modifier.fillMaxWidth(),
+                        minLines = 5
+                    )
+
+                    Spacer(modifier = Modifier.height(24.dp))
+
+                    // 🧂 Ingredients
+                    Text("Ingredients", fontWeight = FontWeight.SemiBold)
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Button(
+                        onClick = { viewModel.addEmptyIngredient() },
+                        enabled = !isUploading
+                    ) {
+                        Text("+ Add Ingredient")
+                    }
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    draft.ingredients.forEachIndexed { index, pair ->
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            OutlinedTextField(
+                                value = pair.first,
+                                onValueChange = { viewModel.updateIngredient(index, it) },
+                                label = { Text("Ingredient") },
+                                modifier = Modifier.weight(1f),
+                                enabled = !isUploading
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            OutlinedTextField(
+                                value = pair.second,
+                                onValueChange = { viewModel.updateMeasure(index, it) },
+                                label = { Text("Measure") },
+                                modifier = Modifier.weight(1f),
+                                enabled = !isUploading
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            IconButton(
+                                onClick = { viewModel.removeIngredient(index) },
+                                enabled = !isUploading
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Delete,
+                                    contentDescription = "Remove Ingredient",
+                                    tint = Color.Red
+                                )
+                            }
+                        }
+                        Spacer(modifier = Modifier.height(8.dp))
+                    }
+
+                    Spacer(modifier = Modifier.height(32.dp))
+
+                    // 🧰 Action Buttons
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceEvenly
+                    ) {
+                        Button(
+                            onClick = {
+                                viewModel.saveDraft()
+                                Toast.makeText(context, "Draft saved!", Toast.LENGTH_SHORT).show()
+                            },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color(0xFF4CAF50),
+                                contentColor = Color.White
+                            ),
+                            enabled = !isUploading
+                        ) {
+                            Text("Save Draft")
+                        }
+
+                        Button(
+                            onClick = {
+                                viewModel.uploadRecipe(
+                                    onSuccess = {
+                                        navController.popBackStack()
+                                        Toast.makeText(context, "Recipe Uploaded!", Toast.LENGTH_LONG).show()
+                                    },
+                                    onError = {
+                                        Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
+                                    }
+                                )
+                            },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color(0xFFFF7043),
+                                contentColor = Color.White
+                            ),
+                            enabled = !isUploading
+                        ) {
+                            Text("Upload Recipe")
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(40.dp))
+                }
+            }
+        }
+
+        // ✨ Overlay always on top
+        AnimatedVisibility(visible = isUploading) {
             Box(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .height(200.dp)
-                    .clip(RoundedCornerShape(16.dp))
-                    .border(2.dp, Color.LightGray, RoundedCornerShape(16.dp))
-                    .clickable { imagePickerLauncher.launch("image/*") },
+                    .fillMaxSize()
+                    .background(Color.Black.copy(alpha = 0.5f)),
                 contentAlignment = Alignment.Center
             ) {
-                if (draft.imageUrl.isNotBlank()) {
-                    Image(
-                        painter = rememberAsyncImagePainter(draft.imageUrl),
-                        contentDescription = "Recipe Image",
-                        modifier = Modifier.fillMaxSize()
-                    )
-                } else {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Icon(
-                            imageVector = Icons.Default.AddPhotoAlternate,
-                            contentDescription = "Upload Icon",
-                            modifier = Modifier.size(48.dp),
-                            tint = Color.Gray
-                        )
-                        Text("Tap to upload image", color = Color.Gray)
-                    }
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    CircularProgressIndicator(color = Color.White)
+                    Spacer(Modifier.height(12.dp))
+                    Text("Uploading your recipe...", color = Color.White)
                 }
             }
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // 📜 Instructions
-            OutlinedTextField(
-                value = draft.steps,
-                onValueChange = { viewModel.updateSteps(it) },
-                label = { Text("Instructions") },
-                modifier = Modifier.fillMaxWidth(),
-                minLines = 5
-            )
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // 🧂 Ingredients
-            Text("Ingredients", fontWeight = FontWeight.SemiBold)
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Button(onClick = { viewModel.addEmptyIngredient() }) {
-                Text("+ Add Ingredient")
-            }
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            // Inside your forEachIndexed ingredient section
-            draft.ingredients.forEachIndexed { index, pair ->
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    OutlinedTextField(
-                        value = pair.first,
-                        onValueChange = { viewModel.updateIngredient(index, it) },
-                        label = { Text("Ingredient") },
-                        modifier = Modifier.weight(1f)
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    OutlinedTextField(
-                        value = pair.second,
-                        onValueChange = { viewModel.updateMeasure(index, it) },
-                        label = { Text("Measure") },
-                        modifier = Modifier.weight(1f)
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    IconButton(onClick = { viewModel.removeIngredient(index) }) {
-                        Icon(
-                            imageVector = Icons.Default.Delete,
-                            contentDescription = "Remove Ingredient",
-                            tint = Color.Red
-                        )
-                    }
-                }
-                Spacer(modifier = Modifier.height(8.dp))
-            }
-
-            Spacer(modifier = Modifier.height(32.dp))
-
-            // 🧰 Action Buttons
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly
-            ) {
-                Button(
-                    onClick = {
-                        viewModel.saveDraft()
-                        Toast.makeText(context, "Draft saved!", Toast.LENGTH_SHORT).show()
-                    },
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFF4CAF50),
-                        contentColor = Color.White
-                    )
-                ) {
-                    Text("Save Draft")
-                }
-
-                Button(
-                    onClick = {
-                        viewModel.uploadRecipe(
-                            onSuccess = {
-                                navController.popBackStack()
-                                Toast.makeText(context, "Recipe Uploaded!", Toast.LENGTH_LONG).show()
-                            },
-                            onError = {
-                                Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
-                            }
-                        )
-                    },
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFFFF7043),
-                        contentColor = Color.White
-                    )
-                ) {
-                    Text("Upload Recipe")
-                }
-            }
-
-            Spacer(modifier = Modifier.height(40.dp))
         }
     }
 }

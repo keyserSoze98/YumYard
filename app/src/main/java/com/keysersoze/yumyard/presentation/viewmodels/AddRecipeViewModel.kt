@@ -2,6 +2,7 @@ package com.keysersoze.yumyard.presentation.viewmodels
 
 import android.content.Context
 import android.net.Uri
+import android.util.Log
 import android.widget.Toast
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -24,6 +25,9 @@ class AddRecipeViewModel @Inject constructor(
 
     private val _draft = MutableStateFlow<UserRecipeDraftEntity?>(null)
     val draft: StateFlow<UserRecipeDraftEntity?> = _draft
+
+    private val _isUploading = MutableStateFlow(false)
+    val isUploading: StateFlow<Boolean> = _isUploading
 
     fun loadDraft(draftId: String) {
         viewModelScope.launch {
@@ -61,18 +65,21 @@ class AddRecipeViewModel @Inject constructor(
         val storageRef = FirebaseStorage.getInstance().reference.child("recipe_images/$fileName")
 
         storageRef.putFile(uri)
-            .addOnSuccessListener {
-                storageRef.downloadUrl.addOnSuccessListener { downloadUrl ->
-                    updateImageUrl(downloadUrl.toString())
-                    Toast.makeText(context, "Image uploaded!", Toast.LENGTH_SHORT).show()
-                }.addOnFailureListener {
-                    Toast.makeText(context, "Failed to fetch URL: ${it.message}", Toast.LENGTH_SHORT).show()
+            .continueWithTask { task ->
+                if (!task.isSuccessful) {
+                    throw task.exception ?: Exception("Upload failed")
                 }
+                storageRef.downloadUrl
+            }
+            .addOnSuccessListener { downloadUrl ->
+                updateImageUrl(downloadUrl.toString())
+                Toast.makeText(context, "Image uploaded!", Toast.LENGTH_SHORT).show()
             }
             .addOnFailureListener {
                 Toast.makeText(context, "Upload failed: ${it.message}", Toast.LENGTH_SHORT).show()
             }
     }
+
 
     fun updateSteps(steps: String) {
         updateDraft { it.copy(steps = steps, lastUpdated = System.currentTimeMillis()) }
@@ -130,14 +137,23 @@ class AddRecipeViewModel @Inject constructor(
         val user = FirebaseAuth.getInstance().currentUser
         if (user == null) {
             onError("User not logged in")
+            Log.d("UPLOAD_RECIPE", "User not logged in")
             return
         }
 
         val draftData = _draft.value
-        if (draftData == null || draftData.title.isBlank() || draftData.steps.isBlank()) {
+        if (draftData == null) {
+            Log.d("UPLOAD_RECIPE", "Draft data is null")
+            onError("Draft data is null")
+            return
+        }
+        if (draftData.title.isBlank() || draftData.steps.isBlank()) {
+            Log.d("UPLOAD_RECIPE", "Incomplete data: title or steps blank")
             onError("Incomplete recipe data")
             return
         }
+
+        _isUploading.value = true
 
         val dataMap = hashMapOf<String, Any>(
             "idMeal" to draftData.id,
@@ -156,16 +172,22 @@ class AddRecipeViewModel @Inject constructor(
             dataMap["strMeasure${index + 1}"] = measure
         }
 
+        Log.d("UPLOAD_RECIPE", "Uploading data: $dataMap")
+
         FirebaseFirestore.getInstance()
             .collection("user_recipes")
             .document(draftData.id)
             .set(dataMap)
             .addOnSuccessListener {
+                Log.d("UPLOAD_RECIPE", "Upload success!")
                 deleteDraft(draftData.id)
+                _isUploading.value = false
                 onSuccess()
             }
-            .addOnFailureListener {
-                onError(it.message ?: "Upload failed")
+            .addOnFailureListener { e ->
+                Log.e("UPLOAD_RECIPE", "Upload failed: ${e.message}", e)
+                _isUploading.value = false
+                onError(e.message ?: "Upload failed")
             }
     }
 
