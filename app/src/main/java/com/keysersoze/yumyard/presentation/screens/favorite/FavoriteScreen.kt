@@ -67,15 +67,26 @@ fun FavoriteScreen(
                     onClick = {
                         coroutineScope.launch {
                             try {
-                                val fullRecipe = viewModel.fetchFullRecipeById(favorite.id)
+                                val fullRecipe = try {
+                                    viewModel.fetchFullRecipeById(favorite.id)
+                                } catch (apiEx: Exception) {
+                                    Log.d("@@@FavExc", "API fetch failed, trying Firestore: ${apiEx.message}")
+                                    try {
+                                        viewModel.fetchFullUserRecipeById(favorite.id)
+                                    } catch (firestoreEx: Exception) {
+                                        Log.d("@@@FavExc", "Firestore fetch also failed: ${firestoreEx.message}")
+                                        throw firestoreEx // rethrow to catch block below
+                                    }
+                                }
+
                                 val encoded = URLEncoder.encode(
                                     Json.encodeToString(fullRecipe),
                                     StandardCharsets.UTF_8.toString()
                                 )
                                 navController.navigate("details/$encoded")
-                            } catch (e: Exception) {
+                            } catch (finalEx: Exception) {
                                 Toast.makeText(context, "Failed to load recipe", Toast.LENGTH_SHORT).show()
-                                Log.d("@@@Exc", e.toString())
+                                Log.d("@@@FavExc", finalEx.toString())
                             }
                         }
                     }

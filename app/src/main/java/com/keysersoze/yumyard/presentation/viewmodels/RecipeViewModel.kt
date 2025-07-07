@@ -1,5 +1,6 @@
 package com.keysersoze.yumyard.presentation.viewmodels
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.keysersoze.yumyard.domain.model.Recipe
@@ -8,6 +9,7 @@ import com.keysersoze.yumyard.domain.usecase.recipe.GetUserRecipesUseCase
 import com.keysersoze.yumyard.domain.usecase.recipe.SearchRecipesUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
@@ -58,7 +60,7 @@ class RecipeViewModel @Inject constructor(
         _query.value = newQuery
     }
 
-    suspend fun loadRecipes(query: String) {
+    private suspend fun loadRecipes(query: String) {
         _loading.value = true
         try {
             val apiResults = searchRecipesUseCase(query)
@@ -74,15 +76,23 @@ class RecipeViewModel @Inject constructor(
     private fun loadRandomRecipes() {
         viewModelScope.launch {
             _loading.value = true
-            try {
-                val apiResults = getRandomRecipesUseCase()
-                val userResults = getUserRecipesUseCase.getAllUserRecipes()
-                _recipes.value = apiResults + userResults
-            } catch (e: Exception) {
-                e.printStackTrace()
-            } finally {
-                _loading.value = false
+
+            val apiDeferred = async {
+                try { getRandomRecipesUseCase() } catch (e: Exception) {
+                    Log.e("@@@RandomRecipesApiFailure", e.toString())
+                    emptyList()
+                }
             }
+
+            val userDeferred = async {
+                try { getUserRecipesUseCase.getAllUserRecipes() } catch (e: Exception) {
+                    Log.e("@@@RandomRecipesUserFailure", e.toString())
+                    emptyList()
+                }
+            }
+
+            _recipes.value = apiDeferred.await() + userDeferred.await()
+            _loading.value = false
         }
     }
 }

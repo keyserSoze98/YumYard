@@ -62,7 +62,11 @@ fun RecipeDetailScreen(
             description = recipe.description.replace("+", " "),
             cuisine = recipe.cuisine.replace("+", " "),
             ingredients = recipe.ingredients.map { it.replace("+", " ") },
-            steps = recipe.steps.map { it.replace("+", " ") }
+            steps = recipe.steps.map {
+                it.replace("+", " ")
+                    .replace(Regex("^\\d+(\\.\\d+)?[\\s\\.]*"), "")
+                    .trimStart()
+            }
         )
     }
 

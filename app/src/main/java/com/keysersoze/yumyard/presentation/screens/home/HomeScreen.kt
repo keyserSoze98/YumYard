@@ -229,7 +229,6 @@ fun HomeScreen(viewModel: RecipeViewModel = hiltViewModel(), navController: NavH
     }
 }
 
-
 @Composable
 fun RecipeCard(
     recipe: Recipe,

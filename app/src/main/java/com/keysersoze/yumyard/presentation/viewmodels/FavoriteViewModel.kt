@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.keysersoze.yumyard.domain.model.Favorite
 import com.keysersoze.yumyard.domain.model.Recipe
 import com.keysersoze.yumyard.domain.usecase.favorite.FavoriteUseCases
+import com.keysersoze.yumyard.domain.usecase.recipe.GetFullUserRecipeByIdUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -14,7 +15,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class FavoriteViewModel @Inject constructor(
-    private val favoriteUseCases: FavoriteUseCases
+    private val favoriteUseCases: FavoriteUseCases,
+    private val getFullUserRecipeByIdUseCase: GetFullUserRecipeByIdUseCase
 ) : ViewModel() {
 
     val favorites: StateFlow<List<Favorite>> = favoriteUseCases.getAllFavoritesUseCase()
@@ -42,6 +44,10 @@ class FavoriteViewModel @Inject constructor(
 
     suspend fun fetchFullRecipeById(id: String): Recipe {
         return favoriteUseCases.fetchFullRecipeByIdUseCase(id)
+    }
+
+    suspend fun fetchFullUserRecipeById(id: String): Recipe {
+        return getFullUserRecipeByIdUseCase.execute(id)
     }
 
     fun clearAllFavorites() {

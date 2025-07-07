@@ -10,7 +10,7 @@ data class MealDto(
     val idMeal: String,
     val strMeal: String,
     val strArea: String,
-    val strDescription: String,
+    val strDescription: String?,
     val strInstructions: String,
     val strMealThumb: String,
     val strIngredient1: String?,
@@ -74,7 +74,7 @@ fun MealDto.toRecipe(): Recipe {
     return Recipe(
         id = idMeal,
         title = strMeal,
-        description = strDescription,
+        description = strDescription ?: (strInstructions.take(200) + "..."),
         cuisine = strArea,
         imageUrl = strMealThumb,
         ingredients = ingredients,
