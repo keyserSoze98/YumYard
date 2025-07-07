@@ -1,5 +1,6 @@
 package com.keysersoze.yumyard.presentation.screens.details
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -36,30 +37,42 @@ import com.keysersoze.yumyard.domain.model.toFavorite
 import com.keysersoze.yumyard.presentation.viewmodels.FavoriteViewModel
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
-import java.net.URLDecoder
-import java.nio.charset.StandardCharsets
 
 @Composable
-fun RecipeDetailScreen(recipeJson: String, viewModel: FavoriteViewModel = hiltViewModel()) {
+fun RecipeDetailScreen(
+    recipeJson: String,
+    viewModel: FavoriteViewModel = hiltViewModel()
+) {
+    Log.d("@@@recipeJson", recipeJson)
     val coroutineScope = rememberCoroutineScope()
     var isFav by remember { mutableStateOf(false) }
-    val decodedJson = URLDecoder.decode(recipeJson, StandardCharsets.UTF_8.toString())
-    val recipe = remember(decodedJson) {
+
+    val recipe = remember(recipeJson) {
         try {
-            Json.decodeFromString<Recipe>(decodedJson)
+            Json.decodeFromString<Recipe>(recipeJson)
         } catch (e: Exception) {
             e.printStackTrace()
             null
         }
     }
 
-    if (recipe == null) {
+    val cleanedRecipe = remember(recipe) {
+        recipe?.copy(
+            title = recipe.title.replace("+", " "),
+            description = recipe.description.replace("+", " "),
+            cuisine = recipe.cuisine.replace("+", " "),
+            ingredients = recipe.ingredients.map { it.replace("+", " ") },
+            steps = recipe.steps.map { it.replace("+", " ") }
+        )
+    }
+
+    if (cleanedRecipe == null) {
         Text("Oops! Recipe couldn't be loaded.", modifier = Modifier.padding(16.dp))
         return
     }
 
-    LaunchedEffect(recipe.id) {
-        isFav = viewModel.isFavorite(recipe.id)
+    LaunchedEffect(cleanedRecipe.id) {
+        isFav = viewModel.isFavorite(cleanedRecipe.id)
     }
 
     Column(
@@ -72,9 +85,9 @@ fun RecipeDetailScreen(recipeJson: String, viewModel: FavoriteViewModel = hiltVi
             onClick = {
                 coroutineScope.launch {
                     if (isFav) {
-                        viewModel.removeFromFavorites(recipe.toFavorite())
+                        viewModel.removeFromFavorites(cleanedRecipe.toFavorite())
                     } else {
-                        viewModel.addToFavorites(recipe.toFavorite())
+                        viewModel.addToFavorites(cleanedRecipe.toFavorite())
                     }
                     isFav = !isFav
                 }
@@ -89,8 +102,8 @@ fun RecipeDetailScreen(recipeJson: String, viewModel: FavoriteViewModel = hiltVi
         }
 
         Image(
-            painter = rememberAsyncImagePainter(recipe.imageUrl),
-            contentDescription = recipe.title,
+            painter = rememberAsyncImagePainter(cleanedRecipe.imageUrl),
+            contentDescription = cleanedRecipe.title,
             contentScale = ContentScale.Crop,
             modifier = Modifier
                 .fillMaxWidth()
@@ -100,19 +113,19 @@ fun RecipeDetailScreen(recipeJson: String, viewModel: FavoriteViewModel = hiltVi
         Spacer(modifier = Modifier.height(16.dp))
 
         Text(
-            text = recipe.title,
+            text = cleanedRecipe.title,
             style = MaterialTheme.typography.headlineMedium,
             fontWeight = FontWeight.Bold
         )
 
         Text(
-            text = "Cuisine: ${recipe.cuisine}",
+            text = "Cuisine: ${cleanedRecipe.cuisine}",
             style = MaterialTheme.typography.headlineSmall,
             fontWeight = FontWeight.SemiBold
         )
 
         Text(
-            text = recipe.description,
+            text = cleanedRecipe.description,
             style = MaterialTheme.typography.bodyLarge,
             modifier = Modifier.padding(vertical = 8.dp)
         )
@@ -123,7 +136,7 @@ fun RecipeDetailScreen(recipeJson: String, viewModel: FavoriteViewModel = hiltVi
             fontWeight = FontWeight.SemiBold
         )
 
-        recipe.ingredients.forEach {
+        cleanedRecipe.ingredients.forEach {
             Text(text = "• $it", style = MaterialTheme.typography.bodyMedium)
         }
 
@@ -136,7 +149,7 @@ fun RecipeDetailScreen(recipeJson: String, viewModel: FavoriteViewModel = hiltVi
             modifier = Modifier.padding(top = 8.dp)
         )
 
-        recipe.steps.forEachIndexed { i, step ->
+        cleanedRecipe.steps.forEachIndexed { i, step ->
             Text(text = "${i + 1}. $step", style = MaterialTheme.typography.bodyMedium)
         }
     }

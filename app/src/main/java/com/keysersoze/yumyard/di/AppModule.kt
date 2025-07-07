@@ -2,6 +2,7 @@ package com.keysersoze.yumyard.di
 
 import android.content.Context
 import androidx.room.Room
+import com.google.firebase.firestore.FirebaseFirestore
 import com.keysersoze.yumyard.data.local.YumYardDatabase
 import com.keysersoze.yumyard.data.local.dao.FavoriteDao
 import com.keysersoze.yumyard.data.local.dao.UserRecipeDraftDao
@@ -75,5 +76,11 @@ object AppModule {
             deleteDraftByIdUseCase = DeleteDraftByIdUseCase(repository),
             upsertDraftUseCase = UpsertDraftUseCase(repository)
         )
+    }
+
+    @Provides
+    @Singleton
+    fun provideFirestore(): FirebaseFirestore {
+        return FirebaseFirestore.getInstance()
     }
 }

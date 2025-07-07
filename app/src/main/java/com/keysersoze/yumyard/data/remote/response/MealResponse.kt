@@ -10,6 +10,7 @@ data class MealDto(
     val idMeal: String,
     val strMeal: String,
     val strArea: String,
+    val strDescription: String,
     val strInstructions: String,
     val strMealThumb: String,
     val strIngredient1: String?,
@@ -56,11 +57,9 @@ data class MealDto(
 
 fun MealDto.toRecipe(): Recipe {
     val ingredients = mutableListOf<String>()
-
     for (i in 1..20) {
         val ingredientField = MealDto::class.java.getDeclaredField("strIngredient$i")
         val measureField = MealDto::class.java.getDeclaredField("strMeasure$i")
-
         ingredientField.isAccessible = true
         measureField.isAccessible = true
 
@@ -75,10 +74,10 @@ fun MealDto.toRecipe(): Recipe {
     return Recipe(
         id = idMeal,
         title = strMeal,
-        description = strInstructions.take(200) + "...",
+        description = strDescription,
         cuisine = strArea,
         imageUrl = strMealThumb,
         ingredients = ingredients,
-        steps = strInstructions.split("\r\n").filter { it.isNotBlank() }
+        steps = strInstructions.split(Regex("[\r\n]+")).map { it.trim() }.filter { it.isNotBlank() }
     )
 }

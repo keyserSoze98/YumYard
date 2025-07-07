@@ -158,7 +158,9 @@ class AddRecipeViewModel @Inject constructor(
         val dataMap = hashMapOf<String, Any>(
             "idMeal" to draftData.id,
             "strMeal" to draftData.title,
+            "strMealLower" to draftData.title.lowercase(),
             "strArea" to draftData.cuisine,
+            "strDescription" to draftData.description,
             "strInstructions" to draftData.steps,
             "strMealThumb" to draftData.imageUrl,
             "author" to (user.displayName ?: "Anonymous"),

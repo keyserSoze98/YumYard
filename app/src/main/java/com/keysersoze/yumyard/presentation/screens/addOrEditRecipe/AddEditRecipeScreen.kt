@@ -173,6 +173,17 @@ fun AddEditRecipeScreen(
 
                     Spacer(modifier = Modifier.height(24.dp))
 
+                    // 📜 Description
+                    OutlinedTextField(
+                        value = draft.steps,
+                        onValueChange = { viewModel.updateDescription(it) },
+                        label = { Text("Description") },
+                        modifier = Modifier.fillMaxWidth(),
+                        minLines = 2
+                    )
+
+                    Spacer(modifier = Modifier.height(24.dp))
+
                     // 📜 Instructions
                     OutlinedTextField(
                         value = draft.steps,

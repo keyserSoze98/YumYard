@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.keysersoze.yumyard.domain.model.Recipe
 import com.keysersoze.yumyard.domain.usecase.recipe.GetRandomRecipesUseCase
+import com.keysersoze.yumyard.domain.usecase.recipe.GetUserRecipesUseCase
 import com.keysersoze.yumyard.domain.usecase.recipe.SearchRecipesUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.FlowPreview
@@ -19,7 +20,8 @@ import javax.inject.Inject
 @HiltViewModel
 class RecipeViewModel @Inject constructor(
     private val searchRecipesUseCase: SearchRecipesUseCase,
-    private val getRandomRecipesUseCase: GetRandomRecipesUseCase
+    private val getRandomRecipesUseCase: GetRandomRecipesUseCase,
+    private val getUserRecipesUseCase: GetUserRecipesUseCase
 ): ViewModel() {
 
     private val _query = MutableStateFlow("")
@@ -59,7 +61,9 @@ class RecipeViewModel @Inject constructor(
     suspend fun loadRecipes(query: String) {
         _loading.value = true
         try {
-            _recipes.value = searchRecipesUseCase(query)
+            val apiResults = searchRecipesUseCase(query)
+            val userResults = getUserRecipesUseCase.searchRecipesByTitle(query)
+            _recipes.value = apiResults + userResults
         } catch (e: Exception) {
             e.printStackTrace()
         } finally {
@@ -71,7 +75,9 @@ class RecipeViewModel @Inject constructor(
         viewModelScope.launch {
             _loading.value = true
             try {
-                _recipes.value = getRandomRecipesUseCase()
+                val apiResults = getRandomRecipesUseCase()
+                val userResults = getUserRecipesUseCase.getAllUserRecipes()
+                _recipes.value = apiResults + userResults
             } catch (e: Exception) {
                 e.printStackTrace()
             } finally {

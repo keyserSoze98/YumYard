@@ -1,5 +1,6 @@
 package com.keysersoze.yumyard.presentation.screens.home
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -235,6 +236,7 @@ fun RecipeCard(
     onClick: () -> Unit,
     viewModel: FavoriteViewModel = hiltViewModel()
 ) {
+    Log.d("@@@Recipe", recipe.toString())
     val coroutineScope = rememberCoroutineScope()
     var isFav by remember { mutableStateOf(false) }
 
