@@ -74,7 +74,7 @@ fun MealDto.toRecipe(): Recipe {
     return Recipe(
         id = idMeal,
         title = strMeal,
-        description = strDescription ?: (strInstructions.take(200) + "..."),
+        description = strDescription ?: (strInstructions.take(100) + "..."),
         cuisine = strArea,
         imageUrl = strMealThumb,
         ingredients = ingredients,

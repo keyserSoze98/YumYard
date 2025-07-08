@@ -114,6 +114,8 @@ dependencies {
     implementation(libs.firebase.analytics)
     implementation(libs.firebase.firestore.ktx)
     implementation(libs.firebase.storage.ktx)
+    implementation(libs.firebase.messaging.ktx)
+    implementation(libs.firebase.inappmessaging.display)
 
     // Room components
     implementation(libs.androidx.room.runtime)
