@@ -11,7 +11,7 @@ import androidx.compose.ui.graphics.Color
 private val DarkColorScheme = darkColorScheme(
     primary = PrimaryOrange,
     secondary = SecondaryPeach,
-    background = Color(0xFF121212), // A dark background
+    background = Color(0xFF121212),
     surface = Color(0xFF1E1E1E),
     onPrimary = Color.White,
     onSecondary = Color.White,
@@ -36,7 +36,7 @@ private val LightColorScheme = lightColorScheme(
 
 @Composable
 fun YumYardTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(), // 🍫 Auto detects system dark mode
+    darkTheme: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit
 ) {
     val colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme
