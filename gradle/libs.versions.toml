@@ -17,6 +17,7 @@ composeBom = "2025.06.00"
 lifecycleViewmodelCompose = "2.9.1"
 hiltAndroid = "2.51"
 materialIconsExtendedVersion = "1.6.1"
+playServicesAdsVersion = "24.4.0"
 retrofit = "2.9.0"
 converterGson = "2.9.0"
 kotlinxCoroutinesAndroid = "1.7.3"
@@ -61,6 +62,7 @@ androidx-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-toolin
 androidx-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
 androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
 androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
+play-services-ads = { module = "com.google.android.gms:play-services-ads", version.ref = "playServicesAdsVersion" }
 play-services-auth = { module = "com.google.android.gms:play-services-auth" }
 retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
 converter-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "converterGson" }

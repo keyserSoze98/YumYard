@@ -12,6 +12,7 @@ import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -34,6 +35,9 @@ class RecipeViewModel @Inject constructor(
 
     private val _loading = MutableStateFlow(false)
     val loading: StateFlow<Boolean> = _loading
+
+    private val _clickCounter = MutableStateFlow(0)
+    val clickCounter: StateFlow<Int> = _clickCounter.asStateFlow()
 
     init {
         loadRandomRecipes()
@@ -93,6 +97,17 @@ class RecipeViewModel @Inject constructor(
 
             _recipes.value = apiDeferred.await() + userDeferred.await()
             _loading.value = false
+        }
+    }
+
+    fun incrementCounterAndGet(): Int {
+        val newValue = _clickCounter.value + 1
+        if (newValue >= 3) {
+            _clickCounter.value = 0
+            return 0
+        } else {
+            _clickCounter.value = newValue
+            return newValue
         }
     }
 }

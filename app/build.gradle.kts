@@ -126,6 +126,9 @@ dependencies {
     // Refresh Page
     implementation(libs.google.accompanist.swiperefresh)
 
+    // Google Ads
+    implementation(libs.play.services.ads)
+
     // Unit Testing
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

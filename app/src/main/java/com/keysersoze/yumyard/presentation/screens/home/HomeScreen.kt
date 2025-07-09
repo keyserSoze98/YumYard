@@ -1,5 +1,7 @@
 package com.keysersoze.yumyard.presentation.screens.home
 
+import BannerAdView
+import android.app.Activity
 import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -26,6 +28,7 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -53,6 +56,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
@@ -61,10 +65,15 @@ import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
+import com.google.android.gms.ads.AdError
+import com.google.android.gms.ads.FullScreenContentCallback
+import com.google.android.gms.ads.interstitial.InterstitialAd
 import com.keysersoze.yumyard.domain.model.Recipe
 import com.keysersoze.yumyard.domain.model.toFavorite
+import com.keysersoze.yumyard.presentation.screens.adBanner.loadInterstitialAd
 import com.keysersoze.yumyard.presentation.viewmodels.FavoriteViewModel
 import com.keysersoze.yumyard.presentation.viewmodels.RecipeViewModel
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -74,7 +83,10 @@ import kotlin.system.exitProcess
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen(viewModel: RecipeViewModel = hiltViewModel(), navController: NavHostController) {
+fun HomeScreen(
+    viewModel: RecipeViewModel = hiltViewModel(),
+    navController: NavHostController
+) {
     val recipes by viewModel.recipes.collectAsState()
     val isLoading by viewModel.loading.collectAsState()
     val query by viewModel.query.collectAsState()
@@ -83,68 +95,19 @@ fun HomeScreen(viewModel: RecipeViewModel = hiltViewModel(), navController: NavH
     val scope = rememberCoroutineScope()
     val swipeRefreshState = rememberSwipeRefreshState(isRefreshing = isLoading)
 
+    val context = LocalContext.current
+    val activity = context as Activity
+    var interstitialAd by remember { mutableStateOf<InterstitialAd?>(null) }
+    val clickCount by viewModel.clickCounter.collectAsState()
+
+    LaunchedEffect(Unit) {
+        loadInterstitialAd(context) { ad -> interstitialAd = ad }
+    }
+
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
-            ModalDrawerSheet {
-                Text(
-                    "YumYard",
-                    modifier = Modifier.padding(16.dp),
-                    style = MaterialTheme.typography.headlineSmall
-                )
-                HorizontalDivider(
-                    modifier = Modifier.padding(8.dp),
-                    thickness = 4.dp,
-                    color = Color.Magenta
-                )
-
-                NavigationDrawerItem(
-                    label = { Text("My Account") },
-                    selected = false,
-                    onClick = {
-                        navController.navigate("account")
-                        scope.launch { drawerState.close() }
-                    },
-                    icon = {
-                        Icon(Icons.Default.Person, contentDescription = "My Account")
-                    }
-                )
-
-                NavigationDrawerItem(
-                    label = { Text("Favorites") },
-                    selected = false,
-                    onClick = {
-                        navController.navigate("favorites")
-                        scope.launch { drawerState.close() }
-                    },
-                    icon = {
-                        Icon(Icons.Default.Favorite, contentDescription = "Favorites")
-                    }
-                )
-
-                NavigationDrawerItem(
-                    label = { Text("Add Recipes") },
-                    selected = false,
-                    onClick = {
-                        navController.navigate("draft_recipes")
-                        scope.launch { drawerState.close() }
-                    },
-                    icon = {
-                        Icon(Icons.AutoMirrored.Filled.Notes, contentDescription = "Your Recipes")
-                    }
-                )
-
-                NavigationDrawerItem(
-                    label = { Text("Exit App") },
-                    selected = false,
-                    onClick = {
-                        exitProcess(0)
-                    },
-                    icon = {
-                        Icon(Icons.Default.Close, contentDescription = "Favorites")
-                    }
-                )
-            }
+            DrawerContent(navController, drawerState, scope)
         }
     ) {
         Scaffold(
@@ -152,20 +115,26 @@ fun HomeScreen(viewModel: RecipeViewModel = hiltViewModel(), navController: NavH
                 TopAppBar(
                     title = { Text("YumYard") },
                     navigationIcon = {
-                        IconButton(onClick = {
-                            scope.launch { drawerState.open() }
-                        }) {
+                        IconButton(onClick = { scope.launch { drawerState.open() } }) {
                             Icon(Icons.Default.Menu, contentDescription = "Menu")
                         }
                     }
                 )
+            },
+            bottomBar = {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(50.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    BannerAdView()
+                }
             }
         ) { innerPadding ->
             SwipeRefresh(
                 state = swipeRefreshState,
-                onRefresh = {
-                    viewModel.onQueryChange("")
-                }
+                onRefresh = { viewModel.onQueryChange("") }
             ) {
                 Column(
                     modifier = Modifier
@@ -189,43 +158,92 @@ fun HomeScreen(viewModel: RecipeViewModel = hiltViewModel(), navController: NavH
                             Box(
                                 modifier = Modifier.fillMaxSize(),
                                 contentAlignment = Alignment.Center
-                            ) {
-                                CircularProgressIndicator()
-                            }
+                            ) { CircularProgressIndicator() }
                         }
-
                         recipes.isNotEmpty() -> {
                             LazyColumn(
                                 contentPadding = PaddingValues(16.dp),
                                 verticalArrangement = Arrangement.spacedBy(16.dp)
                             ) {
                                 items(recipes) { recipe ->
-                                    RecipeCard(
-                                        recipe = recipe,
-                                        onClick = {
-                                            val encodedRecipe = URLEncoder.encode(
-                                                Json.encodeToString(recipe),
-                                                StandardCharsets.UTF_8.toString()
-                                            )
-                                            navController.navigate("details/$encodedRecipe")
-                                        }
-                                    )
+                                    RecipeCard(recipe = recipe, onClick = {
+                                        val newClickCount = viewModel.incrementCounterAndGet()
+                                        handleRecipeClick(
+                                            recipe,
+                                            navController,
+                                            interstitialAd,
+                                            newClickCount,
+                                            activity
+                                        ) { ad -> interstitialAd = ad }
+
+                                    })
                                 }
                             }
                         }
-
                         else -> {
                             Box(
                                 modifier = Modifier.fillMaxSize(),
                                 contentAlignment = Alignment.Center
-                            ) {
-                                Text("No recipes found 😞")
-                            }
+                            ) { Text("No recipes found 😞") }
                         }
                     }
                 }
             }
         }
+    }
+}
+
+@Composable
+fun DrawerContent(
+    navController: NavHostController,
+    drawerState: DrawerState,
+    scope: CoroutineScope
+) {
+    ModalDrawerSheet {
+        Text(
+            "YumYard",
+            modifier = Modifier.padding(16.dp),
+            style = MaterialTheme.typography.headlineSmall
+        )
+        HorizontalDivider(
+            modifier = Modifier.padding(8.dp),
+            thickness = 4.dp,
+            color = Color.Magenta
+        )
+
+        NavigationDrawerItem(
+            label = { Text("My Account") },
+            selected = false,
+            onClick = {
+                navController.navigate("account")
+                scope.launch { drawerState.close() }
+            },
+            icon = { Icon(Icons.Default.Person, contentDescription = "My Account") }
+        )
+        NavigationDrawerItem(
+            label = { Text("Favorites") },
+            selected = false,
+            onClick = {
+                navController.navigate("favorites")
+                scope.launch { drawerState.close() }
+            },
+            icon = { Icon(Icons.Default.Favorite, contentDescription = "Favorites") }
+        )
+        NavigationDrawerItem(
+            label = { Text("Add Recipes") },
+            selected = false,
+            onClick = {
+                navController.navigate("draft_recipes")
+                scope.launch { drawerState.close() }
+            },
+            icon = { Icon(Icons.AutoMirrored.Filled.Notes, contentDescription = "Your Recipes") }
+        )
+        NavigationDrawerItem(
+            label = { Text("Exit App") },
+            selected = false,
+            onClick = { exitProcess(0) },
+            icon = { Icon(Icons.Default.Close, contentDescription = "Exit") }
+        )
     }
 }
 
@@ -290,5 +308,42 @@ fun RecipeCard(
                 Text(recipe.description, style = MaterialTheme.typography.bodyMedium, color = Color.Gray)
             }
         }
+    }
+}
+
+fun handleRecipeClick(
+    recipe: Recipe,
+    navController: NavHostController,
+    interstitialAd: InterstitialAd?,
+    clickCount: Int,
+    activity: Activity,
+    updateAd: (InterstitialAd?) -> Unit
+) {
+    val encodedRecipe = URLEncoder.encode(
+        Json.encodeToString(recipe),
+        StandardCharsets.UTF_8.toString()
+    )
+
+    Log.d("@@@Interstitial", "Click count: $clickCount")
+
+    if (clickCount == 0 && interstitialAd != null) {
+        interstitialAd.fullScreenContentCallback = object : FullScreenContentCallback() {
+            override fun onAdDismissedFullScreenContent() {
+                navController.navigate("details/$encodedRecipe")
+                loadInterstitialAd(activity) { updateAd(it) }
+            }
+
+            override fun onAdFailedToShowFullScreenContent(adError: AdError) {
+                navController.navigate("details/$encodedRecipe")
+                loadInterstitialAd(activity) { updateAd(it) }
+            }
+
+            override fun onAdShowedFullScreenContent() {
+                updateAd(null)
+            }
+        }
+        interstitialAd.show(activity)
+    } else {
+        navController.navigate("details/$encodedRecipe")
     }
 }
