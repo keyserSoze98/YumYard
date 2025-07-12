@@ -1,5 +1,6 @@
 package com.keysersoze.yumyard.presentation.screens.addOrEditRecipe
 
+import android.app.Activity
 import android.net.Uri
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -39,6 +40,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -49,7 +53,11 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
+import com.google.android.gms.ads.AdError
+import com.google.android.gms.ads.FullScreenContentCallback
+import com.google.android.gms.ads.interstitial.InterstitialAd
 import com.google.firebase.auth.FirebaseAuth
+import com.keysersoze.yumyard.presentation.screens.adBanner.loadInterstitialAd
 import com.keysersoze.yumyard.presentation.viewmodels.AddRecipeViewModel
 
 @Composable
@@ -62,6 +70,7 @@ fun AddEditRecipeScreen(
     val user = FirebaseAuth.getInstance().currentUser
     val draftState by viewModel.draft.collectAsState()
     val isUploading by viewModel.isUploading.collectAsState()
+    var interstitialAd by remember { mutableStateOf<InterstitialAd?>(null) }
 
     val imagePickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
@@ -266,15 +275,51 @@ fun AddEditRecipeScreen(
 
                         Button(
                             onClick = {
-                                viewModel.uploadRecipe(
-                                    onSuccess = {
-                                        navController.popBackStack()
-                                        Toast.makeText(context, "Recipe Uploaded!", Toast.LENGTH_LONG).show()
-                                    },
-                                    onError = {
-                                        Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
+                                if (interstitialAd != null) {
+                                    interstitialAd?.fullScreenContentCallback = object : FullScreenContentCallback() {
+                                        override fun onAdDismissedFullScreenContent() {
+                                            viewModel.uploadRecipe(
+                                                onSuccess = {
+                                                    navController.popBackStack()
+                                                    Toast.makeText(context, "Recipe Uploaded!", Toast.LENGTH_LONG).show()
+                                                },
+                                                onError = {
+                                                    Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
+                                                }
+                                            )
+                                            loadInterstitialAd(context) { ad -> interstitialAd = ad }
+                                        }
+
+                                        override fun onAdFailedToShowFullScreenContent(adError: AdError) {
+                                            viewModel.uploadRecipe(
+                                                onSuccess = {
+                                                    navController.popBackStack()
+                                                    Toast.makeText(context, "Recipe Uploaded!", Toast.LENGTH_LONG).show()
+                                                },
+                                                onError = {
+                                                    Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
+                                                }
+                                            )
+                                            loadInterstitialAd(context) { ad -> interstitialAd = ad }
+                                        }
+
+                                        override fun onAdShowedFullScreenContent() {
+                                            interstitialAd = null
+                                        }
                                     }
-                                )
+                                    interstitialAd?.show(context as Activity)
+                                } else {
+                                    viewModel.uploadRecipe(
+                                        onSuccess = {
+                                            navController.popBackStack()
+                                            Toast.makeText(context, "Recipe Uploaded!", Toast.LENGTH_LONG).show()
+                                        },
+                                        onError = {
+                                            Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
+                                        }
+                                    )
+                                    loadInterstitialAd(context) { ad -> interstitialAd = ad }
+                                }
                             },
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = Color(0xFFFF7043),
@@ -291,7 +336,6 @@ fun AddEditRecipeScreen(
             }
         }
 
-        // ✨ Overlay always on top
         AnimatedVisibility(visible = isUploading) {
             Box(
                 modifier = Modifier

@@ -1,6 +1,5 @@
 package com.keysersoze.yumyard.presentation.screens.home
 
-import BannerAdView
 import android.app.Activity
 import android.util.Log
 import androidx.compose.foundation.Image
@@ -98,7 +97,6 @@ fun HomeScreen(
     val context = LocalContext.current
     val activity = context as Activity
     var interstitialAd by remember { mutableStateOf<InterstitialAd?>(null) }
-    val clickCount by viewModel.clickCounter.collectAsState()
 
     LaunchedEffect(Unit) {
         loadInterstitialAd(context) { ad -> interstitialAd = ad }
@@ -120,7 +118,7 @@ fun HomeScreen(
                         }
                     }
                 )
-            },
+            }/*,
             bottomBar = {
                 Box(
                     modifier = Modifier
@@ -130,7 +128,7 @@ fun HomeScreen(
                 ) {
                     BannerAdView()
                 }
-            }
+            }*/
         ) { innerPadding ->
             SwipeRefresh(
                 state = swipeRefreshState,
