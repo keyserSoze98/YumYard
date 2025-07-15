@@ -9,7 +9,7 @@ import com.google.android.gms.ads.LoadAdError
 
 @Composable
 fun BannerAdView(
-    adUnitId: String = "ca-app-pub-3940256099942544/6300978111"
+    adUnitId: String = "ca-app-pub-2487665338717314/6548721112"  // Test ID: "ca-app-pub-3940256099942544/6300978111"
 ) {
     AndroidView(factory = { context ->
         AdView(context).apply {

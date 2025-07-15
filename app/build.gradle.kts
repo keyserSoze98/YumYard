@@ -16,15 +16,15 @@ android {
         applicationId = "com.keysersoze.yumyard"
         minSdk = 24
         targetSdk = 36
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = 2
+        versionName = "2.0.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         javaCompileOptions {
             annotationProcessorOptions {
                 arguments += mapOf(
-                    "room.schemaLocation" to "$projectDir/schemas".toString(),
+                    "room.schemaLocation" to "$projectDir/schemas",
                     "room.incremental" to "true",
                     "room.expandProjection" to "true"
                 )
