@@ -4,7 +4,9 @@ import android.net.Uri
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -24,6 +26,7 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
@@ -56,19 +59,20 @@ fun AccountScreen(navController: NavController, viewModel: AccountViewModel = hi
     var displayName by remember { mutableStateOf(user?.displayName ?: "") }
     var isEditing by remember { mutableStateOf(false) }
     var showDeleteDialog by remember { mutableStateOf(false) }
-
     var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
+    var isProcessing by remember { mutableStateOf(false) }
 
     val imageLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
-    ) {
-        uri ->
+    ) { uri ->
         uri?.let {
             selectedImageUri = it
+            isProcessing = true
             viewModel.updatePhotoUrl(it) { success ->
+                isProcessing = false
                 Toast.makeText(
                     context,
-                    if (success) "Profile picture updated!" else "Failed to updated picture!",
+                    if (success) "Profile picture updated!" else "Failed to update picture!",
                     Toast.LENGTH_LONG
                 ).show()
             }
@@ -76,8 +80,7 @@ fun AccountScreen(navController: NavController, viewModel: AccountViewModel = hi
     }
 
     Surface(
-        modifier = Modifier
-            .fillMaxSize()
+        modifier = Modifier.fillMaxSize()
     ) {
         Column(
             modifier = Modifier
@@ -92,7 +95,7 @@ fun AccountScreen(navController: NavController, viewModel: AccountViewModel = hi
                 modifier = Modifier
                     .size(100.dp)
                     .clip(CircleShape)
-                    .clickable { imageLauncher.launch("image/*") },
+                    .clickable(enabled = !isProcessing) { imageLauncher.launch("image/*") },
                 contentAlignment = Alignment.BottomEnd
             ) {
                 Image(
@@ -118,23 +121,29 @@ fun AccountScreen(navController: NavController, viewModel: AccountViewModel = hi
             Spacer(modifier = Modifier.height(16.dp))
 
             if (isEditing) {
-                    OutlinedTextField(
-                        value = displayName,
-                        onValueChange = { displayName = it },
-                        label = { Text("Display Name") },
-                        singleLine = true
-                    )
+                OutlinedTextField(
+                    value = displayName,
+                    onValueChange = { displayName = it },
+                    label = { Text("Display Name") },
+                    singleLine = true,
+                    enabled = !isProcessing
+                )
                 Spacer(modifier = Modifier.height(8.dp))
-                Button( onClick = {
-                    viewModel.updateDisplayName(displayName) { success ->
-                        if (success) {
-                            Toast.makeText(context, "Profile Updated!", Toast.LENGTH_LONG).show()
-                            isEditing = false
-                        } else {
-                            Toast.makeText(context, "Failed to update!", Toast.LENGTH_SHORT).show()
+                Button(
+                    onClick = {
+                        isProcessing = true
+                        viewModel.updateDisplayName(displayName) { success ->
+                            isProcessing = false
+                            if (success) {
+                                Toast.makeText(context, "Profile Updated!", Toast.LENGTH_LONG).show()
+                                isEditing = false
+                            } else {
+                                Toast.makeText(context, "Failed to update!", Toast.LENGTH_SHORT).show()
+                            }
                         }
-                    }
-                }) {
+                    },
+                    enabled = !isProcessing
+                ) {
                     Text("Save")
                 }
             } else {
@@ -142,7 +151,7 @@ fun AccountScreen(navController: NavController, viewModel: AccountViewModel = hi
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(user?.email ?: "", color = Color.Gray)
                 Spacer(modifier = Modifier.height(8.dp))
-                TextButton(onClick = { isEditing = true }) {
+                TextButton(onClick = { isEditing = true }, enabled = !isProcessing) {
                     Icon(Icons.Default.Edit, contentDescription = null)
                     Spacer(modifier = Modifier.width(4.dp))
                     Text("Edit Display Name")
@@ -153,8 +162,15 @@ fun AccountScreen(navController: NavController, viewModel: AccountViewModel = hi
 
             Button(
                 onClick = {
-                    viewModel.signOut()
+                    isProcessing = true
+                    viewModel.signOut {
+                        isProcessing = false
+                        navController.navigate("login") {
+                            popUpTo(0) { inclusive = true }
+                        }
+                    }
                 },
+                enabled = !isProcessing,
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2196F3))
             ) {
@@ -167,6 +183,7 @@ fun AccountScreen(navController: NavController, viewModel: AccountViewModel = hi
 
             Button(
                 onClick = { showDeleteDialog = true },
+                enabled = !isProcessing,
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
             ) {
@@ -181,14 +198,18 @@ fun AccountScreen(navController: NavController, viewModel: AccountViewModel = hi
                 onDismissRequest = { showDeleteDialog = false },
                 confirmButton = {
                     TextButton(onClick = {
+                        showDeleteDialog = false
+                        isProcessing = true
                         viewModel.deleteAccount(
                             onSuccess = {
+                                isProcessing = false
                                 Toast.makeText(context, "Account Deleted!", Toast.LENGTH_LONG).show()
                                 navController.navigate("login") {
                                     popUpTo(0) { inclusive = true }
                                 }
                             },
                             onError = {
+                                isProcessing = false
                                 Toast.makeText(context, it, Toast.LENGTH_LONG).show()
                             }
                         )
@@ -197,15 +218,28 @@ fun AccountScreen(navController: NavController, viewModel: AccountViewModel = hi
                     }
                 },
                 dismissButton = {
-                    TextButton(onClick = {
-                        showDeleteDialog = false
-                    }) {
+                    TextButton(onClick = { showDeleteDialog = false }) {
                         Text("Cancel")
                     }
                 },
                 title = { Text("Delete Account") },
                 text = { Text("Are you sure you want to delete your account? This action cannot be undone.") }
             )
+        }
+
+        AnimatedVisibility(visible = isProcessing) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Black.copy(alpha = 0.5f)),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    CircularProgressIndicator(color = Color.White)
+                    Spacer(Modifier.height(12.dp))
+                    Text("Processing...", color = Color.White)
+                }
+            }
         }
     }
 }

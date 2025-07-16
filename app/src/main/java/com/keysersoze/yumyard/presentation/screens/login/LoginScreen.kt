@@ -42,6 +42,7 @@ fun LoginScreen(navController: NavHostController) {
     val context = LocalContext.current
     val auth = FirebaseAuth.getInstance()
     var signInCredential by remember { mutableStateOf<GoogleSignInAccount?>(null) }
+    var isSigningIn by remember { mutableStateOf(false) }
 
     val launcher = rememberLauncherForActivityResult(StartActivityForResult()) { result ->
         val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
@@ -50,12 +51,15 @@ fun LoginScreen(navController: NavHostController) {
             signInCredential = account
         } catch (e: Exception) {
             Log.e("@@@LoginScreen", "Login failed", e)
+            Toast.makeText(context, "Login cancelled or failed.", Toast.LENGTH_SHORT).show()
+            isSigningIn = false
         }
     }
 
     LaunchedEffect(signInCredential) {
         signInCredential?.let { account ->
             try {
+                isSigningIn = true
                 val credential = GoogleAuthProvider.getCredential(account.idToken, null)
                 auth.signInWithCredential(credential).await()
                 Log.d("@@@LoginScreen", "Login successful: ${auth.currentUser?.email}")
@@ -66,6 +70,7 @@ fun LoginScreen(navController: NavHostController) {
             } catch (e: Exception) {
                 Log.e("@@@LoginScreen", "Firebase sign-in failed", e)
                 Toast.makeText(context, "Login Failed!", Toast.LENGTH_LONG).show()
+                isSigningIn = false
             }
         }
     }
@@ -89,11 +94,16 @@ fun LoginScreen(navController: NavHostController) {
     ) {
         Text("Welcome to YumYard!", style = MaterialTheme.typography.headlineMedium)
         Spacer(Modifier.height(32.dp))
+
         Button(
             onClick = {
-                val signInIntent = signInClient.signInIntent
-                launcher.launch(signInIntent)
-            }
+                isSigningIn = true
+                signInClient.signOut().addOnCompleteListener {
+                    val signInIntent = signInClient.signInIntent
+                    launcher.launch(signInIntent)
+                }
+            },
+            enabled = !isSigningIn
         ) {
             Icon(
                 painter = painterResource(id = R.drawable.ic_google),
@@ -101,7 +111,16 @@ fun LoginScreen(navController: NavHostController) {
                 modifier = Modifier.size(20.dp)
             )
             Spacer(Modifier.width(8.dp))
-            Text("Sign in with Google")
+            Text(if (isSigningIn) "Please wait..." else "Sign in with Google")
         }
+    }
+
+    if (isSigningIn) {
+        androidx.compose.material3.AlertDialog(
+            onDismissRequest = { },
+            confirmButton = {},
+            title = { Text("Signing you in...") },
+            text = { Text("Please wait while we connect to Google.") }
+        )
     }
 }

@@ -18,8 +18,16 @@ class AccountViewModel @Inject constructor(
 ) : ViewModel() {
     private val currentUser: FirebaseUser? = Firebase.auth.currentUser
 
-    fun signOut() {
-        Firebase.auth.signOut()
+    fun signOut(onComplete: () -> Unit) {
+        viewModelScope.launch {
+            try {
+                clearAllFavoritesUseCase()
+                Firebase.auth.signOut()
+                onComplete()
+            } catch (_: Exception) {
+
+            }
+        }
     }
 
     fun deleteAccount(onSuccess: () -> Unit, onError: (String) -> Unit) {
