@@ -11,7 +11,7 @@ fun loadInterstitialAd(context: Context, onLoaded: (InterstitialAd?) -> Unit) {
     val adRequest = AdRequest.Builder().build()
     InterstitialAd.load(
         context,
-        "ca-app-pub-2487665338717314/6388939019", // Test ID: "ca-app-pub-3940256099942544/1033173712"
+            "ca-app-pub-2487665338717314/6388939019", // Test ID: "ca-app-pub-3940256099942544/1033173712"
         adRequest,
         object : InterstitialAdLoadCallback() {
             override fun onAdLoaded(ad: InterstitialAd) {

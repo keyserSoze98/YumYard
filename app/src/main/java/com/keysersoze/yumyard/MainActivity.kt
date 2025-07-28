@@ -1,12 +1,15 @@
 package com.keysersoze.yumyard
 
 import android.Manifest
+import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.material3.Surface
@@ -16,6 +19,7 @@ import androidx.navigation.compose.rememberNavController
 import com.keysersoze.yumyard.presentation.navigation.NavGraph
 import com.keysersoze.yumyard.ui.theme.YumYardTheme
 import dagger.hilt.android.AndroidEntryPoint
+import java.security.MessageDigest
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -32,6 +36,8 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        //printAppSignatureSHA1(this)
 
         setContent {
             YumYardTheme {
@@ -56,17 +62,25 @@ class MainActivity : ComponentActivity() {
                     this,
                     Manifest.permission.POST_NOTIFICATIONS
                 ) == PackageManager.PERMISSION_GRANTED -> {
-                    // Permission already granted
                 }
                 shouldShowRequestPermissionRationale(Manifest.permission.POST_NOTIFICATIONS) -> {
-                    // TODO: show rationale UI (dialog or snackbar), then request permission
                     requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
                 }
                 else -> {
-                    // Directly request
                     requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
                 }
             }
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.P)
+    fun printAppSignatureSHA1(context: Context) {
+        val info = context.packageManager.getPackageInfo(context.packageName, PackageManager.GET_SIGNING_CERTIFICATES)
+        for (signature in info.signingInfo?.apkContentsSigners!!) {
+            val md = MessageDigest.getInstance("SHA-1")
+            val digest = md.digest(signature.toByteArray())
+            val toHexString = digest.joinToString(":") { byte -> "%02X".format(byte) }
+            Log.d("AppSignature", "SHA1: $toHexString")
         }
     }
 }
