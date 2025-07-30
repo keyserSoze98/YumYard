@@ -41,9 +41,16 @@ android {
                 "proguard-rules.pro"
             )
 
+            //noinspection WrongGradleMethod
             firebaseCrashlytics {
                 mappingFileUploadEnabled = true
             }
+
+            buildConfigField("boolean", "LEAK_CANARY_ENABLED", "false")
+        }
+
+        debug {
+            buildConfigField("boolean", "LEAK_CANARY_ENABLED", "true")
         }
     }
     compileOptions {
@@ -60,6 +67,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
     kapt {
         correctErrorTypes = true
@@ -150,4 +158,7 @@ dependencies {
     androidTestImplementation(libs.hilt.android.testing)
     kaptAndroidTest(libs.hilt.compiler)
     testImplementation(libs.androidx.room.testing)
+
+    // Leak Canary
+    debugImplementation(libs.leakcanary.android)
 }
