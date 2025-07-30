@@ -39,6 +39,8 @@ class MainActivity : ComponentActivity() {
 
         //printAppSignatureSHA1(this)
 
+        //crashlyticsTest()
+
         setContent {
             YumYardTheme {
                 val navController = rememberNavController()
@@ -82,5 +84,10 @@ class MainActivity : ComponentActivity() {
             val toHexString = digest.joinToString(":") { byte -> "%02X".format(byte) }
             Log.d("AppSignature", "SHA1: $toHexString")
         }
+    }
+
+    private fun crashlyticsTest() {
+        Log.d("@@@FirebaseCrashlytics", "Testing!")
+        throw RuntimeException("Test Crash")
     }
 }

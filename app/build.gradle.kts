@@ -6,6 +6,7 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.google.services)
     kotlin("kapt")
+    id("com.google.firebase.crashlytics")
 }
 
 android {
@@ -39,6 +40,10 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+
+            firebaseCrashlytics {
+                mappingFileUploadEnabled = true
+            }
         }
     }
     compileOptions {
@@ -116,6 +121,8 @@ dependencies {
     implementation(libs.firebase.storage.ktx)
     implementation(libs.firebase.messaging.ktx)
     implementation(libs.firebase.inappmessaging.display)
+    implementation(libs.firebase.crashlytics.ktx)
+    implementation(libs.google.firebase.analytics)
 
     // Room components
     implementation(libs.androidx.room.runtime)
