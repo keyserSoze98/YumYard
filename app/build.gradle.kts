@@ -48,10 +48,6 @@ android {
 
             buildConfigField("boolean", "LEAK_CANARY_ENABLED", "false")
         }
-
-        debug {
-            buildConfigField("boolean", "LEAK_CANARY_ENABLED", "true")
-        }
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
