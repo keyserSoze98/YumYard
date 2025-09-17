@@ -57,7 +57,7 @@ import com.google.android.gms.ads.AdError
 import com.google.android.gms.ads.FullScreenContentCallback
 import com.google.android.gms.ads.interstitial.InterstitialAd
 import com.google.firebase.auth.FirebaseAuth
-import com.keysersoze.yumyard.presentation.screens.adBanner.loadInterstitialAd
+import com.keysersoze.yumyard.util.adBanner.loadInterstitialAd
 import com.keysersoze.yumyard.presentation.viewmodels.AddRecipeViewModel
 
 @Composable

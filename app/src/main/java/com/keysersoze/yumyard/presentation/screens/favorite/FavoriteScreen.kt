@@ -1,6 +1,6 @@
 package com.keysersoze.yumyard.presentation.screens.favorite
 
-import BannerAdView
+import com.keysersoze.yumyard.util.adBanner.BannerAdView
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement

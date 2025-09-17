@@ -1,6 +1,5 @@
 package com.keysersoze.yumyard.presentation.screens.drafts
 
-import BannerAdView
 import android.app.Activity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -51,8 +50,9 @@ import com.google.android.gms.ads.FullScreenContentCallback
 import com.google.android.gms.ads.interstitial.InterstitialAd
 import com.google.firebase.auth.FirebaseAuth
 import com.keysersoze.yumyard.data.local.entities.UserRecipeDraftEntity
-import com.keysersoze.yumyard.presentation.screens.adBanner.loadInterstitialAd
 import com.keysersoze.yumyard.presentation.viewmodels.DraftViewModel
+import com.keysersoze.yumyard.util.adBanner.BannerAdView
+import com.keysersoze.yumyard.util.adBanner.loadInterstitialAd
 import java.text.DateFormat
 import java.util.Date
 import java.util.UUID

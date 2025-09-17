@@ -31,6 +31,10 @@ android {
                 )
             }
         }
+
+        resValue("string", "admob_app_id", "\"${project.properties["AD_APP_ID"]}\"")
+        resValue("string", "banner_ad_unit_id", "\"${project.properties["BANNER_AD_UNIT_ID"]}\"")
+        resValue("string", "interstitial_ad_unit_id", "\"${project.properties["INTERSTITIAL_AD_UNIT_ID"]}\"")
     }
 
     buildTypes {

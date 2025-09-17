@@ -69,7 +69,7 @@ import com.google.android.gms.ads.FullScreenContentCallback
 import com.google.android.gms.ads.interstitial.InterstitialAd
 import com.keysersoze.yumyard.domain.model.Recipe
 import com.keysersoze.yumyard.domain.model.toFavorite
-import com.keysersoze.yumyard.presentation.screens.adBanner.loadInterstitialAd
+import com.keysersoze.yumyard.util.adBanner.loadInterstitialAd
 import com.keysersoze.yumyard.presentation.viewmodels.FavoriteViewModel
 import com.keysersoze.yumyard.presentation.viewmodels.RecipeViewModel
 import kotlinx.coroutines.CoroutineScope
