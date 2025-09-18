@@ -66,7 +66,7 @@ YumYard is a modern Android recipe app built with best practices, offering:
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-username/YumYard.git
+git clone https://github.com/keyserSoze98/YumYard.git
 
 # Open in Android Studio
 # Add your google-services.json (for Firebase)
