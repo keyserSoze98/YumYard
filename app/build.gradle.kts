@@ -1,3 +1,6 @@
+import java.io.FileInputStream
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -32,9 +35,13 @@ android {
             }
         }
 
-        resValue("string", "admob_app_id", "\"${project.properties["AD_APP_ID"]}\"")
-        resValue("string", "banner_ad_unit_id", "\"${project.properties["BANNER_AD_UNIT_ID"]}\"")
-        resValue("string", "interstitial_ad_unit_id", "\"${project.properties["INTERSTITIAL_AD_UNIT_ID"]}\"")
+        val localProps = Properties().apply {
+            load(FileInputStream(rootProject.file("local.properties")))
+        }
+
+        resValue("string", "admob_app_id", localProps["AD_APP_ID"]?.toString() ?: "")
+        resValue("string", "banner_ad_unit_id", localProps["BANNER_AD_UNIT_ID"]?.toString() ?: "")
+        resValue("string", "interstitial_ad_unit_id", localProps["INTERSTITIAL_AD_UNIT_ID"]?.toString() ?: "")
     }
 
     buildTypes {
