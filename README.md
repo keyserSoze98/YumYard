@@ -9,8 +9,8 @@ YumYard is a modern Android recipe app built with best practices, offering:
 
 📥 Download
 📱 APK	🌐 Play Store
-Download APK
-	Google Play Store
+⬇️ Download APK
+	🚀 Google Play Store
 ✨ Features
 Feature	Description
 🔎 Browse & Search	Discover thousands of recipes with images, ingredients & step-by-step instructions
@@ -44,8 +44,11 @@ Ads	Google AdMob (Banner + Interstitial)
 git clone https://github.com/your-username/YumYard.git
 
 # Open in Android Studio
+
 # Add your google-services.json (for Firebase)
+
 # Add AdMob keys in local.properties (not public!)
+
 # Run the app 🚀
 
 💡 Future Improvements
