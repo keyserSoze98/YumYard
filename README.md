@@ -13,7 +13,7 @@ YumYard is a modern Android recipe app built with best practices, offering:
 
 | Type | Link |
 |------|------|
-| 📱 APK | [Download APK](https://your-apk-link.com) |
+| 📱 APK | [Download APK](apk/YumYard-v2.0.0.apk) |
 | 🌐 Play Store | [Google Play Store](https://play.google.com/store/apps/details?id=com.keysersoze.yumyard) |
 
 ---
