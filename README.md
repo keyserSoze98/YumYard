@@ -1,29 +1,31 @@
 🍲 YumYard – Recipe Discovery App
 
+📌 App Overview
 YumYard is a modern Android recipe app built with best practices, offering:
-✅ Seamless cooking experience
-✅ Offline access
-✅ Real-time updates
-✅ Personalized recommendations
-✅ Community-driven recipe sharing
 
-📥 Download
-📱 APK	🌐 Play Store
-⬇️ Download APK
-	🚀 Google Play Store
+Seamless cooking experience
+
+Offline access
+
+Real-time updates
+
+Personalized recommendations
+
+Community-driven recipe sharing
+
 ✨ Features
-Feature	Description
+Feature	Status
 🔎 Browse & Search	Discover thousands of recipes with images, ingredients & step-by-step instructions
 🍴 Filter Recipes	Search by cuisine, dietary restrictions, or cooking time
 ⭐ Save Favorites	Bookmark recipes for quick access (Room Database)
 📶 Offline Mode	Access saved recipes without internet connection
-👤 User Profiles	Sign in with Firebase Auth to sync favorites across devices
-🔄 Real-Time Updates	Recipes always stay fresh with Firestore cloud sync
+👤 User Profiles	Firebase Auth login + sync across devices
+🔄 Real-Time Updates	Firestore cloud sync keeps recipes fresh
 ➕ Community Recipes	Users can add & share their own recipes
-💰 Ad Integration	Monetized using Google AdMob (Banner & Interstitial Ads)
-📩 Push Notifications	Trending recipes via Firebase Cloud Messaging (FCM)
-🌙 Dark Mode	Seamless light/dark theme switching with Compose
-🛠 Tech Stack
+💰 Ad Integration	Google AdMob (Banner + Interstitial Ads)
+📩 Push Notifications	FCM-powered trending recipe alerts
+🌙 Dark Mode	Seamless light/dark theme switching
+🛠️ Tech Stack
 Layer	Technology
 Language	Kotlin
 UI	Jetpack Compose
@@ -35,29 +37,38 @@ Authentication	Firebase Auth
 Cloud Database	Firestore
 Analytics	Firebase Analytics + Crashlytics
 Async Handling	Kotlin Coroutines + Flow
-Images	Coil (Image Loading)
-Ads	Google AdMob (Banner + Interstitial)
-📸 Screenshots
-<p align="center"> <img src="screenshots/home.png" width="30%" /> <img src="screenshots/search.png" width="30%" /> <img src="screenshots/details.png" width="30%" /> </p>
-🚀 Getting Started
-# Clone the repository
+Images	Coil
+Ads	Google AdMob
+📱 Screenshots
+Home	Search	Details
+<img src="screenshots/home.png" width="250"/>	<img src="screenshots/search.png" width="250"/>	<img src="screenshots/details.png" width="250"/>
+📦 Download
+Type	Link
+📱 APK	⬇️ Download APK
+
+🌐 Play Store	🚀 Google Play Store
+🚀 How to Run
+
+Clone the repository
+
 git clone https://github.com/your-username/YumYard.git
 
-# Open in Android Studio
 
-# Add your google-services.json (for Firebase)
+Open in Android Studio
 
-# Add AdMob keys in local.properties (not public!)
+Add your google-services.json (Firebase)
 
-# Run the app 🚀
+Add AdMob keys in local.properties (not public!)
+
+Run the app 🚀
 
 💡 Future Improvements
 Planned Feature	Description
-🎙️ Advanced Search	Voice-powered search for faster discovery
-🤖 Personalized Recommendations	AI/ML-driven recipe suggestions
-🧑‍🍳 Meal Planner	Weekly meal planning with shopping lists
+🎙️ Advanced Search	Voice-powered search
+🤖 Personalized Recommendations	AI/ML-driven suggestions
+🧑‍🍳 Meal Planner	Weekly meal planning + shopping lists
 🌍 Localization	Multi-language support
 🤝 Contributing
 
 Contributions, issues, and feature requests are welcome!
-Feel free to fork the repo and submit a PR 🚀
+Feel free to fork and submit a PR 🚀
