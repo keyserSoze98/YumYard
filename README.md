@@ -56,9 +56,9 @@ YumYard is a modern Android recipe app built with best practices, offering:
 
 ## 📸 Screenshots
 
-| Home | Search | Details |
+| Home | Profile | Details |
 |------|--------|---------|
-| ![](screenshots/home.png) | ![](screenshots/search.png) | ![](screenshots/details.png) |
+| ![](screenshots/home.png) | ![](screenshots/profile.png) | ![](screenshots/details.png) |
 
 ---
 
