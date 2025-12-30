@@ -51,7 +51,7 @@ fun NavGraph(navController: NavHostController) {
         }
 
         composable(
-            route = "add_edit_recipe/{id}",
+            route = "${Screen.AddEditRecipe}/{id}",
             arguments = listOf(navArgument("id") { type = NavType.StringType })
         ) { backStackEntry ->
             val draftId = backStackEntry.arguments?.getString("id") ?: return@composable
