@@ -3,25 +3,24 @@ import java.util.Properties
 
 plugins {
     alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.hilt)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.google.services)
-    kotlin("kapt")
+    alias(libs.plugins.legacy.kapt)
     id("com.google.firebase.crashlytics")
 }
 
 android {
     namespace = "com.keysersoze.yumyard"
-    compileSdk = 36
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "com.keysersoze.yumyard"
         minSdk = 24
         targetSdk = 36
-        versionCode = 5
-        versionName = "2.0.0"
+        versionCode = 6
+        versionName = "12.684"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -61,31 +60,34 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
-    }
-    kotlinOptions {
-        jvmTarget = "11"
-    }
-    kotlin {
-        sourceSets.all {
-            languageSettings.optIn("kotlinx.serialization.ExperimentalSerializationApi")
-        }
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     buildFeatures {
         compose = true
         buildConfig = true
+        resValues = true
     }
-    kapt {
-        correctErrorTypes = true
-        arguments {
-            arg("room.schemaLocation", "$projectDir/schemas")
-            arg("room.incremental", "true")
-        }
-        javacOptions {
-            option("-Adagger.fastInit=ENABLED")
-            option("-Adagger.hilt.android.internal.disableAndroidSuperclassValidation=true")
-        }
+}
+
+kotlin {
+    compilerOptions {
+        jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
+    }
+    sourceSets.all {
+        languageSettings.optIn("kotlinx.serialization.ExperimentalSerializationApi")
+    }
+}
+
+kapt {
+    correctErrorTypes = true
+    arguments {
+        arg("room.schemaLocation", "$projectDir/schemas")
+        arg("room.incremental", "true")
+    }
+    javacOptions {
+        option("-Adagger.fastInit=ENABLED")
+        option("-Adagger.hilt.android.internal.disableAndroidSuperclassValidation=true")
     }
 }
 
@@ -150,6 +152,10 @@ dependencies {
 
     // Google Ads
     implementation(libs.play.services.ads)
+
+    // In-App Updates
+    implementation(libs.app.update)
+    implementation(libs.app.update.ktx)
 
     // Unit Testing
     testImplementation(libs.junit)

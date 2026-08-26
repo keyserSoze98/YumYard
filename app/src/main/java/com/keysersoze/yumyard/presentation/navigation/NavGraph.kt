@@ -7,12 +7,13 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.keysersoze.yumyard.presentation.screens.account.AccountScreen
-import com.keysersoze.yumyard.presentation.screens.addOrEditRecipe.AddEditRecipeScreen
 import com.keysersoze.yumyard.presentation.screens.details.RecipeDetailScreen
-import com.keysersoze.yumyard.presentation.screens.drafts.DraftRecipesScreen
+import com.keysersoze.yumyard.presentation.screens.drafts.DraftsScreen
+import com.keysersoze.yumyard.presentation.screens.editor.RecipeEditorScreen
 import com.keysersoze.yumyard.presentation.screens.favorite.FavoriteScreen
 import com.keysersoze.yumyard.presentation.screens.home.HomeScreen
 import com.keysersoze.yumyard.presentation.screens.login.LoginScreen
+import com.keysersoze.yumyard.presentation.screens.myrecipes.MyRecipesScreen
 import com.keysersoze.yumyard.presentation.screens.splash.SplashScreen
 
 @Composable
@@ -33,13 +34,20 @@ fun NavGraph(navController: NavHostController) {
             HomeScreen(navController = navController)
         }
 
-        composable("details/{recipeJson}") { backStackEntry ->
-            val recipeJson = backStackEntry.arguments?.getString("recipeJson") ?: ""
-            RecipeDetailScreen(recipeJson = recipeJson)
+        composable(
+            route = "details/{recipeId}",
+            arguments = listOf(navArgument("recipeId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val recipeId = backStackEntry.arguments?.getString("recipeId") ?: ""
+            RecipeDetailScreen(recipeId = recipeId, navController = navController)
         }
 
         composable(route = Screen.Favorites.route) {
             FavoriteScreen(navController)
+        }
+
+        composable(route = "my_recipes") {
+            MyRecipesScreen(navController)
         }
 
         composable(route = Screen.Account.route) {
@@ -47,15 +55,15 @@ fun NavGraph(navController: NavHostController) {
         }
 
         composable(route = Screen.DraftRecipes.route) {
-            DraftRecipesScreen(navController)
+            DraftsScreen(navController)
         }
 
         composable(
-            route = "${Screen.AddEditRecipe}/{id}",
+            route = "${Screen.AddEditRecipe.route}/{id}",
             arguments = listOf(navArgument("id") { type = NavType.StringType })
         ) { backStackEntry ->
             val draftId = backStackEntry.arguments?.getString("id") ?: return@composable
-            AddEditRecipeScreen(draftId,navController)
+            RecipeEditorScreen(draftId, navController)
         }
     }
 }

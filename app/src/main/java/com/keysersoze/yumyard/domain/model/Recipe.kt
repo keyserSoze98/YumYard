@@ -10,7 +10,13 @@ data class Recipe(
     val cuisine: String = "",
     val imageUrl: String = "",
     val ingredients: List<String> = emptyList(),
-    val steps: List<String> = emptyList()
+    val steps: List<String> = emptyList(),
+    val readyInMinutes: Int = 0,
+    val servings: Int = 0,
+    val rating: Double = 0.0,
+    val difficulty: String = "",
+    val category: String = "",
+    val author: String = ""
 )
 
 fun Recipe.toFavorite(): Favorite {
