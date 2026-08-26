@@ -1,8 +1,10 @@
 package com.keysersoze.yumyard.util.adBanner
 
+import android.app.Activity
 import android.content.Context
-import android.util.Log
+import com.google.android.gms.ads.AdError
 import com.google.android.gms.ads.AdRequest
+import com.google.android.gms.ads.FullScreenContentCallback
 import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.interstitial.InterstitialAd
 import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
@@ -18,12 +20,38 @@ fun loadInterstitialAd(context: Context, onLoaded: (InterstitialAd?) -> Unit) {
     val adRequest = AdRequest.Builder().build()
     InterstitialAd.load(context, adUnitId, adRequest, object : InterstitialAdLoadCallback() {
         override fun onAdLoaded(ad: InterstitialAd) {
-            Log.d("@@@Interstitial", "Ad loaded")
             onLoaded(ad)
         }
         override fun onAdFailedToLoad(adError: LoadAdError) {
-            Log.e("@@@Interstitial", "Failed: ${adError.message}")
             onLoaded(null)
         }
     })
+}
+
+fun showInterstitialAd(
+    ad: InterstitialAd?,
+    activity: Activity,
+    onDone: () -> Unit,
+    onReload: (InterstitialAd?) -> Unit = {}
+) {
+    if (ad != null) {
+        ad.fullScreenContentCallback = object : FullScreenContentCallback() {
+            override fun onAdDismissedFullScreenContent() {
+                onDone()
+                loadInterstitialAd(activity) { onReload(it) }
+            }
+
+            override fun onAdFailedToShowFullScreenContent(adError: AdError) {
+                onDone()
+                loadInterstitialAd(activity) { onReload(it) }
+            }
+
+            override fun onAdShowedFullScreenContent() {
+                onReload(null)
+            }
+        }
+        ad.show(activity)
+    } else {
+        onDone()
+    }
 }

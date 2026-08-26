@@ -1,7 +1,7 @@
 package com.keysersoze.yumyard.domain.usecase.recipe
 
-import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
+import com.keysersoze.yumyard.data.repository.recipe.toRecipe
 import com.keysersoze.yumyard.domain.model.Recipe
 import javax.inject.Inject
 import kotlin.coroutines.resume
@@ -15,7 +15,7 @@ class GetUserRecipesUseCase @Inject constructor(
         firestore.collection("user_recipes")
             .get()
             .addOnSuccessListener { snapshot ->
-                val recipes = snapshot.documents.mapNotNull { mapToRecipe(it) }
+                val recipes = snapshot.documents.mapNotNull { it.toRecipe() }
                 cont.resume(recipes)
             }
             .addOnFailureListener { e ->
@@ -25,11 +25,11 @@ class GetUserRecipesUseCase @Inject constructor(
 
     suspend fun searchRecipesByTitle(query: String): List<Recipe> = suspendCoroutine { cont ->
         firestore.collection("user_recipes")
-            .whereGreaterThanOrEqualTo("strMealLower", query)
-            .whereLessThanOrEqualTo("strMealLower", query + "\uf8ff")
             .get()
             .addOnSuccessListener { snapshot ->
-                val recipes = snapshot.documents.mapNotNull { mapToRecipe(it) }
+                val recipes = snapshot.documents
+                    .mapNotNull { it.toRecipe() }
+                    .filter { it.title.contains(query, ignoreCase = true) }
                 cont.resume(recipes)
             }
             .addOnFailureListener { e ->
@@ -37,28 +37,24 @@ class GetUserRecipesUseCase @Inject constructor(
             }
     }
 
-    private fun mapToRecipe(doc: DocumentSnapshot): Recipe? {
-        return Recipe(
-            id = doc.getString("idMeal") ?: "",
-            title = doc.getString("strMeal") ?: "",
-            description = doc.getString("strDescription") ?: "",
-            cuisine = doc.getString("strArea") ?: "",
-            imageUrl = doc.getString("strMealThumb") ?: "",
-            ingredients = listOfNotNull(
-                doc.getString("strIngredient1"),
-                doc.getString("strIngredient2"),
-                doc.getString("strIngredient3"),
-                doc.getString("strIngredient4"),
-                doc.getString("strIngredient5"),
-                doc.getString("strIngredient6"),
-                doc.getString("strIngredient7")
-            ).filter { it.isNotBlank() },
-            steps = doc.getString("strInstructions")
-                ?.split("\n")
-                ?.map { it.trim().replace(Regex("^\\d+\\.\\s*"), "") }
-                ?.filter { it.isNotBlank() }
-                ?: emptyList()
-        )
+    suspend fun getRecipesByAuthor(authorId: String): List<Recipe> = suspendCoroutine { cont ->
+        firestore.collection("user_recipes")
+            .whereEqualTo("authorId", authorId)
+            .get()
+            .addOnSuccessListener { snapshot ->
+                val recipes = snapshot.documents.mapNotNull { it.toRecipe() }
+                cont.resume(recipes)
+            }
+            .addOnFailureListener { e ->
+                cont.resumeWithException(e)
+            }
     }
 
+    suspend fun deleteRecipe(id: String): Unit = suspendCoroutine { cont ->
+        firestore.collection("user_recipes")
+            .document(id)
+            .delete()
+            .addOnSuccessListener { cont.resume(Unit) }
+            .addOnFailureListener { e -> cont.resumeWithException(e) }
+    }
 }

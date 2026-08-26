@@ -14,7 +14,7 @@ import com.keysersoze.yumyard.data.local.entities.UserRecipeDraftEntity
         FavoriteEntity::class,
         UserRecipeDraftEntity::class
     ],
-    version = 3,
+    version = 4,
     exportSchema = false
 )
 @TypeConverters(Converters::class)

@@ -38,7 +38,11 @@ class AddRecipeViewModel @Inject constructor(
                 description = "",
                 imageUrl = "",
                 ingredients = listOf(Pair("", "")),
-                steps = "",
+                steps = listOf(""),
+                readyInMinutes = 0,
+                servings = 0,
+                difficulty = "",
+                category = "",
                 lastUpdated = System.currentTimeMillis()
             )
         }
@@ -81,8 +85,44 @@ class AddRecipeViewModel @Inject constructor(
     }
 
 
-    fun updateSteps(steps: String) {
-        updateDraft { it.copy(steps = steps, lastUpdated = System.currentTimeMillis()) }
+    fun updateReadyInMinutes(minutes: Int) {
+        updateDraft { it.copy(readyInMinutes = minutes, lastUpdated = System.currentTimeMillis()) }
+    }
+
+    fun updateServings(servings: Int) {
+        updateDraft { it.copy(servings = servings, lastUpdated = System.currentTimeMillis()) }
+    }
+
+    fun updateDifficulty(difficulty: String) {
+        updateDraft { it.copy(difficulty = difficulty, lastUpdated = System.currentTimeMillis()) }
+    }
+
+    fun updateCategory(category: String) {
+        updateDraft { it.copy(category = category, lastUpdated = System.currentTimeMillis()) }
+    }
+
+    fun updateStep(index: Int, value: String) {
+        updateDraft {
+            val updated = it.steps.toMutableList()
+            updated[index] = value
+            it.copy(steps = updated, lastUpdated = System.currentTimeMillis())
+        }
+    }
+
+    fun addEmptyStep() {
+        updateDraft {
+            it.copy(steps = it.steps + "", lastUpdated = System.currentTimeMillis())
+        }
+    }
+
+    fun removeStep(index: Int) {
+        updateDraft {
+            val updated = it.steps.toMutableList().apply { removeAt(index) }
+            it.copy(
+                steps = updated.ifEmpty { listOf("") },
+                lastUpdated = System.currentTimeMillis()
+            )
+        }
     }
 
     fun updateIngredient(index: Int, name: String) {
@@ -147,34 +187,40 @@ class AddRecipeViewModel @Inject constructor(
             onError("Draft data is null")
             return
         }
-        if (draftData.title.isBlank() || draftData.steps.isBlank()) {
+        val cleanSteps = draftData.steps.map { it.trim() }.filter { it.isNotBlank() }
+        if (draftData.title.isBlank() || cleanSteps.isEmpty()) {
             Log.d("UPLOAD_RECIPE", "Incomplete data: title or steps blank")
-            onError("Incomplete recipe data")
+            onError("Add a title and at least one step")
             return
+        }
+
+        val cleanIngredients = draftData.ingredients.mapNotNull { (ingredient, measure) ->
+            val name = ingredient.trim()
+            if (name.isBlank()) return@mapNotNull null
+            val amount = measure.trim()
+            if (amount.isNotBlank()) "$amount $name" else name
         }
 
         _isUploading.value = true
 
         val dataMap = hashMapOf<String, Any>(
-            "idMeal" to draftData.id,
-            "strMeal" to draftData.title,
-            "strMealLower" to draftData.title.lowercase(),
-            "strArea" to draftData.cuisine,
-            "strDescription" to draftData.description,
-            "strInstructions" to draftData.steps,
-            "strMealThumb" to draftData.imageUrl,
+            "id" to draftData.id,
+            "title" to draftData.title.trim(),
+            "titleLower" to draftData.title.trim().lowercase(),
+            "description" to draftData.description.trim(),
+            "cuisine" to draftData.cuisine.trim(),
+            "imageUrl" to draftData.imageUrl,
+            "ingredients" to cleanIngredients,
+            "steps" to cleanSteps,
+            "readyInMinutes" to draftData.readyInMinutes,
+            "servings" to draftData.servings,
+            "rating" to 0.0,
+            "difficulty" to draftData.difficulty.trim(),
+            "category" to draftData.category.trim(),
             "author" to (user.displayName ?: "Anonymous"),
             "authorId" to user.uid,
             "createdAt" to System.currentTimeMillis()
         )
-
-        // Add ingredients and measures
-        draftData.ingredients.forEachIndexed { index, (ingredient, measure) ->
-            dataMap["strIngredient${index + 1}"] = ingredient
-            dataMap["strMeasure${index + 1}"] = measure
-        }
-
-        Log.d("UPLOAD_RECIPE", "Uploading data: $dataMap")
 
         FirebaseFirestore.getInstance()
             .collection("user_recipes")

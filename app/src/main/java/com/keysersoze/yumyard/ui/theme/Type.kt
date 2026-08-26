@@ -49,7 +49,6 @@ val Typography = Typography(
         fontSize = 16.sp
     ),
     bodySmall = TextStyle(
-        fontSize = 12.sp,
-        color = RichBrownText
+        fontSize = 12.sp
     )
 )
