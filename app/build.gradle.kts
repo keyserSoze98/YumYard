@@ -3,11 +3,12 @@ import java.util.Properties
 
 plugins {
     alias(libs.plugins.android.application)
+    alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.hilt)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.google.services)
-    alias(libs.plugins.legacy.kapt)
+    alias(libs.plugins.ksp)
     id("com.google.firebase.crashlytics")
 }
 
@@ -23,16 +24,6 @@ android {
         versionName = "12.684"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-
-        javaCompileOptions {
-            annotationProcessorOptions {
-                arguments += mapOf(
-                    "room.schemaLocation" to "$projectDir/schemas",
-                    "room.incremental" to "true",
-                    "room.expandProjection" to "true"
-                )
-            }
-        }
 
         val localProps = Properties().apply {
             load(FileInputStream(rootProject.file("local.properties")))
@@ -79,16 +70,12 @@ kotlin {
     }
 }
 
-kapt {
-    correctErrorTypes = true
-    arguments {
-        arg("room.schemaLocation", "$projectDir/schemas")
-        arg("room.incremental", "true")
-    }
-    javacOptions {
-        option("-Adagger.fastInit=ENABLED")
-        option("-Adagger.hilt.android.internal.disableAndroidSuperclassValidation=true")
-    }
+ksp {
+    arg("room.schemaLocation", "$projectDir/schemas")
+    arg("room.incremental", "true")
+    arg("room.generateKotlin", "true")
+    arg("dagger.fastInit", "enabled")
+    arg("dagger.hilt.android.internal.disableAndroidSuperclassValidation", "true")
 }
 
 dependencies {
@@ -110,7 +97,7 @@ dependencies {
 
     // Hilt (DI)
     implementation(libs.hilt.android)
-    kapt(libs.hilt.compiler)
+    ksp(libs.hilt.compiler)
     implementation(libs.androidx.hilt.navigation.compose)
 
     // Retrofit + Coroutines
@@ -143,8 +130,7 @@ dependencies {
 
     // Room components
     implementation(libs.androidx.room.runtime)
-    //noinspection KaptUsageInsteadOfKsp
-    kapt(libs.androidx.room.compiler)
+    ksp(libs.androidx.room.compiler)
     implementation(libs.androidx.room.ktx)
 
     // Refresh Page
@@ -169,7 +155,7 @@ dependencies {
     testImplementation(libs.mockk)
     androidTestImplementation(libs.mockk.android)
     androidTestImplementation(libs.hilt.android.testing)
-    kaptAndroidTest(libs.hilt.compiler)
+    kspAndroidTest(libs.hilt.compiler)
     testImplementation(libs.androidx.room.testing)
 
     // Leak Canary
