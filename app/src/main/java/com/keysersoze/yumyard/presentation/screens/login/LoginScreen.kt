@@ -43,6 +43,9 @@ import androidx.navigation.NavHostController
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.android.gms.auth.api.signin.GoogleSignInStatusCodes
+import com.google.android.gms.common.api.ApiException
+import com.google.android.gms.common.api.CommonStatusCodes
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
 import com.keysersoze.yumyard.R
@@ -52,6 +55,21 @@ import kotlinx.coroutines.tasks.await
 
 private val BrandTop = Color(0xFF170D1C)
 private val BrandBottom = Color(0xFF241531)
+
+private fun googleSignInMessage(statusCode: Int): String = when (statusCode) {
+    CommonStatusCodes.NETWORK_ERROR ->
+        "No internet connection. Check your network and try again."
+    GoogleSignInStatusCodes.SIGN_IN_CANCELLED ->
+        "Sign-in cancelled."
+    GoogleSignInStatusCodes.SIGN_IN_CURRENTLY_IN_PROGRESS ->
+        "Sign-in is already in progress."
+    GoogleSignInStatusCodes.SIGN_IN_FAILED ->
+        "Google sign-in failed. Please try again."
+    CommonStatusCodes.DEVELOPER_ERROR ->
+        "Sign-in is misconfigured for this build (error 10)."
+    else ->
+        "Sign-in failed (error $statusCode)."
+}
 
 @Composable
 fun LoginScreen(navController: NavHostController) {
@@ -63,11 +81,14 @@ fun LoginScreen(navController: NavHostController) {
     val launcher = rememberLauncherForActivityResult(StartActivityForResult()) { result ->
         val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
         try {
-            val account = task.result
-            signInCredential = account
+            signInCredential = task.getResult(ApiException::class.java)
+        } catch (e: ApiException) {
+            Log.e("@@@LoginScreen", "Login failed with status ${e.statusCode} (${GoogleSignInStatusCodes.getStatusCodeString(e.statusCode)})", e)
+            Toast.makeText(context, googleSignInMessage(e.statusCode), Toast.LENGTH_LONG).show()
+            isSigningIn = false
         } catch (e: Exception) {
             Log.e("@@@LoginScreen", "Login failed", e)
-            Toast.makeText(context, "Login cancelled or failed.", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "Login failed. Please try again.", Toast.LENGTH_LONG).show()
             isSigningIn = false
         }
     }
